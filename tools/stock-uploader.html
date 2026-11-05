@@ -73,7 +73,7 @@
         ul, ol { margin-bottom: 25px; padding-left: 22px; }
         li { margin-bottom: 10px; font-size: 0.98rem; color: #444; }
 
-        /* 웹 인터랙티브 데모 박스 */
+        /* 실시간 인터랙티브 샌드박스 영역 */
         .demo-sandbox {
             background: #282c34;
             color: #abb2bf;
@@ -83,8 +83,42 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         .demo-sandbox h3 { color: #61afef; font-size: 1.2rem; margin-bottom: 10px; }
-        .demo-sandbox p { color: #98c379; font-size: 0.9rem; margin-bottom: 20px; }
-        .demo-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .demo-sandbox p.subtext { color: #98c379; font-size: 0.9rem; margin-bottom: 20px; }
+        
+        .api-input-wrap {
+            background: #21252b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #3b4048;
+        }
+        .api-input-wrap label { display: block; color: #e5c07b; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; }
+        .api-input-wrap input {
+            width: 100%;
+            background: #282c34;
+            border: 1px solid #4b5263;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed #4b5263;
+            background: #21252b;
+            padding: 25px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upload-zone:hover { border-color: #61afef; background: #242930; }
+        .upload-zone p { color: #abb2bf; margin-bottom: 10px; font-size: 0.95rem; }
+        .file-input { display: none; }
+
+        .demo-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
         .demo-btn {
             background: #4b5263;
             color: #fff;
@@ -98,15 +132,37 @@
         }
         .demo-btn:hover { background: #61afef; color: #21252b; border-color: #61afef; }
         .demo-btn.active { background: #98c379; color: #21252b; border-color: #98c379; }
+        .btn-live-run { background: #98c379; color: #21252b; border-color: #98c379; }
+        .btn-live-run:hover { background: #7cb35b; }
+
+        .preview-area {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .preview-img-box {
+            width: 160px;
+            height: 120px;
+            border: 1px solid #3b4048;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #1e2227;
+        }
+        .preview-img-box img { max-width: 100%; max-height: 100%; object-fit: cover; }
+
         .demo-output {
             background: #1e2227;
             border: 1px solid #3b4048;
-            padding: 15px;
+            padding: 18px;
             border-radius: 6px;
             font-family: 'Consolas', monospace;
             font-size: 0.88rem;
             line-height: 1.6;
-            max-height: 250px;
+            max-height: 320px;
             overflow-y: auto;
             color: #e5c07b;
             white-space: pre-wrap;
@@ -143,7 +199,6 @@
         <h1>StockPhotoUploader</h1>
         <p class="lead-desc">구글 제미나이 멀티모달 API 기반 메타데이터 자동 추출 및 SFTP 스톡 사진 무인 전송 솔루션</p>
 
-        <!-- 배포 다운로드 헤더 -->
         <div class="download-hero">
             <div class="download-info">
                 <h3>StockPhotoUploader v1.0.2 포터블 에디션</h3>
@@ -152,29 +207,51 @@
             <a href="https://github.com/mch9989/moduin.github.io/releases" target="_blank" class="btn-download">다운로드 (GitHub Release)</a>
         </div>
 
-        <!-- 1. 브라우저 실시간 웹 데모 -->
         <h2>웹 인터랙티브 데모 시뮬레이터</h2>
-        <p>프로그램을 내려받기 전, C# 백엔드 엔진이 Google Gemini API와 통신하여 이미지를 어떻게 정량적 메타데이터로 파싱하는지 아래 가상 샘플로 직접 테스트해 보십시오.</p>
+        <p>프로그램을 내려받기 전, 브라우저에서 가상 샘플 결과를 확인하거나 <strong>직접 사진을 업로드하여 Gemini 1.5 Flash Vision 모델을 실시간 테스트</strong>할 수 있습니다.</p>
 
         <div class="demo-sandbox">
-            <h3>[Live Simulator] 이미지 메타데이터 파싱 테스트</h3>
-            <p>// 가상 이미지 샘플을 선택하면 추출 시뮬레이션이 즉시 실행됩니다.</p>
+            <h3>[Live Simulator] 실시간 이미지 분석 콘솔</h3>
+            <p class="subtext">// 개인 Gemini API Key를 입력하면 본인 사진으로 실시간 AI 쿼리가 가능합니다.</p>
             
+            <!-- API Key 입력 영역 -->
+            <div class="api-input-wrap">
+                <label for="apiKeyInput">Google Gemini API Key (미입력 시 아래 샘플 3종 모의 테스트만 동작):</label>
+                <input type="password" id="apiKeyInput" placeholder="AIzaSy... 형식의 API Key를 입력하세요 (브라우저 세션에만 임시 보관)">
+            </div>
+
+            <!-- 사진 업로드 및 미리보기 영역 -->
+            <div class="upload-zone" onclick="document.getElementById('fileUpload').click()">
+                <p>📷 <strong>여기를 클릭하여 분석할 사진을 업로드하세요</strong> (JPG, PNG)</p>
+                <span style="font-size:0.8rem; color:#7f8c8d;">브라우저 내에서 1024px로 자동 압축 후 비동기 전송됩니다.</span>
+                <input type="file" id="fileUpload" class="file-input" accept="image/jpeg, image/png" onchange="handleFileSelect(event)">
+            </div>
+
+            <div class="preview-area" id="previewArea" style="display:none;">
+                <div class="preview-img-box">
+                    <img id="previewImg" src="" alt="업로드 이미지 미리보기">
+                </div>
+                <div style="flex:1;">
+                    <p style="color:#abb2bf; font-size:0.9rem;" id="fileInfoText"></p>
+                    <button class="demo-btn btn-live-run" onclick="executeRealGeminiAnalysis()">⚡ 업로드한 사진 실시간 AI 분석 실행</button>
+                </div>
+            </div>
+
             <div class="demo-controls">
-                <button class="demo-btn active" onclick="runSimulation('camping')">샘플 1: 야간 오토캠핑 풍경</button>
-                <button class="demo-btn" onclick="runSimulation('factory')">샘플 2: 스마트팩토리 PLC 패널</button>
-                <button class="demo-btn" onclick="runSimulation('trading')">샘플 3: 멀티모니터 HTS 트레이딩룸</button>
+                <span style="color:#7f8c8d; font-size:0.85rem; margin-right:5px;">사전 정의 샘플:</span>
+                <button class="demo-btn active" onclick="runSimulation('camping')">샘플 1: 야간 오토캠핑</button>
+                <button class="demo-btn" onclick="runSimulation('factory')">샘플 2: PLC 컨트롤 패널</button>
+                <button class="demo-btn" onclick="runSimulation('trading')">샘플 3: HTS 트레이딩룸</button>
             </div>
 
             <div class="demo-output" id="outputConsole">
 {
   "status": "ready",
-  "message": "상단 샘플 버튼을 누르면 AI 분석 시뮬레이션 결과가 이곳에 출력됩니다."
+  "message": "상단 샘플 버튼을 누르거나, 개인 사진을 업로드하여 실시간 AI 메타데이터 추출을 시작하세요."
 }
             </div>
         </div>
 
-        <!-- 2. 주요 기능 및 아키텍처 -->
         <h2>핵심 기능 및 기술적 특징</h2>
         <ul>
             <li><strong>지능형 로컬 DB 캐싱:</strong> 이미지 SHA-256 해시를 인덱싱하여 한 번 분석한 파일은 Gemini API를 다시 호출하지 않고 로컬 DB에서 0.01초 만에 불러옵니다 (토큰 비용 80% 이상 절감).</li>
@@ -182,7 +259,6 @@
             <li><strong>SFTP 임시 확장자(.tmp) 안전 전송:</strong> 원격 서버 업로드 중 통신이 끊겨도 깨진 파일이 배포되지 않도록 파일 전송 완료 후 파일명을 변경하는 무결성 프로토콜을 준수합니다.</li>
         </ul>
 
-        <!-- 3. 사용 방법 매뉴얼 -->
         <h2>사용 매뉴얼 (Quick Start)</h2>
         <ol>
             <li><strong>API Key 설정:</strong> 프로그램 최초 실행 시 Google AI Studio에서 발급받은 무료 Gemini API Key를 입력하고 저장합니다.</li>
@@ -198,8 +274,11 @@
         <p>&copy; 2026 moduin.kr & PlatformWorks. All Rights Reserved.</p>
     </footer>
 
-    <!-- 웹 데모 구동 자바스크립트 -->
+    <!-- 실시간 브라우저 캔버스 리사이징 및 Gemini API 호출 자바스크립트 -->
     <script>
+        let currentBase64Image = null;
+        let currentMimeType = "image/jpeg";
+
         const sampleDatabase = {
             camping: {
                 title: "Tranquil Night Camping with Off-Road SUV Under the Stars",
@@ -224,23 +303,138 @@
             }
         };
 
+        // 1. 모의 샘플 테스트 동작
         function runSimulation(type) {
-            // 버튼 활성화 상태 토글
             const buttons = document.querySelectorAll('.demo-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event) event.target.classList.add('active');
 
             const consoleBox = document.getElementById('outputConsole');
-            consoleBox.innerHTML = "// Gemini 1.5 Flash Vision API 비동기 스트림 파싱 중...\n";
+            consoleBox.innerHTML = "// [모의 샌드박스] 사전 추출된 메타데이터 역직렬화 중...\n";
 
             setTimeout(() => {
                 const data = sampleDatabase[type];
                 consoleBox.innerHTML = JSON.stringify(data, null, 2);
-            }, 350);
+            }, 300);
         }
 
-        // 초기 실행
-        runSimulation('camping');
+        // 2. 사용자 파일 선택 및 HTML5 Canvas 인메모리 리사이징
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            currentMimeType = file.type || "image/jpeg";
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // 긴 축 기준 1024px 리사이징
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 1024;
+
+                    if (width > height && width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Base64 문자열 추출 (헤더 제외 순수 데이터)
+                    const dataUrl = canvas.toDataURL(currentMimeType, 0.85);
+                    currentBase64Image = dataUrl.split(',')[1];
+
+                    // 미리보기 렌더링
+                    document.getElementById('previewImg').src = dataUrl;
+                    document.getElementById('fileInfoText').innerHTML = `선택된 파일: <strong>${file.name}</strong> (${width}x${height}px 리사이즈 완료)`;
+                    document.getElementById('previewArea').style.display = 'flex';
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 3. 실제 Gemini 1.5 Flash API 비동기 직접 호출
+        async function executeRealGeminiAnalysis() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const consoleBox = document.getElementById('outputConsole');
+
+            if (!apiKey) {
+                alert("실시간 직접 분석을 위해 상단에 Google Gemini API Key를 입력해 주십시오.");
+                document.getElementById('apiKeyInput').focus();
+                return;
+            }
+
+            if (!currentBase64Image) {
+                alert("분석할 이미지 파일을 먼저 선택해 주십시오.");
+                return;
+            }
+
+            consoleBox.innerHTML = `// [실시간 비동기 쿼리 전송 중...]\n// Endpoint: Google Generative Language API (gemini-1.5-flash)\n// 프롬프트: 스톡 메타데이터 스키마 기반 JSON 정제 요청`;
+
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const promptText = "이 이미지를 상업용 스톡 사진 플랫폼 관점에서 분석해줘. 반드시 JSON 형식으로만 답해.\n" +
+                               "스키마: {\n" +
+                               "  \"title\": \"간결하고 명확한 영문 제목 (10단어 내외)\",\n" +
+                               "  \"description\": \"사진의 피사체, 조명, 구도, 정서적 맥락을 상세히 설명한 영문 문장\",\n" +
+                               "  \"keywords\": [\"연관성 높은 영문/국문 키워드 20~25개 배열\"]\n" +
+                               "}";
+
+            const requestBody = {
+                contents: [{
+                    parts: [
+                        { text: promptText },
+                        {
+                            inline_data: {
+                                mime_type: currentMimeType,
+                                data: currentBase64Image
+                            }
+                        }
+                    ]
+                }],
+                generationConfig: {
+                    response_mime_type: "application/json"
+                }
+            };
+
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                }
+
+                const result = await response.json();
+                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+                
+                // Gemini 응답 텍스트 파싱
+                const rawJsonText = result.candidates[0].content.parts[0].text;
+                const parsedData = JSON.parse(rawJsonText);
+                parsedData.processing_time = `${duration}s (Live API Response)`;
+                parsedData.model = "gemini-1.5-flash";
+
+                consoleBox.innerHTML = JSON.stringify(parsedData, null, 2);
+
+            } catch (err) {
+                consoleBox.innerHTML = `// [에러 발생]\n// ${err.message}\n\n※ API Key가 유효한지, 일일 쿼터 제한을 초과하지 않았는지 확인해 주십시오.`;
+            }
+        }
     </script>
 
 </body>
