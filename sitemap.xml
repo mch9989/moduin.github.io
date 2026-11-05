@@ -6,17 +6,42 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://moduin.kr/post-01.html</loc>
+    <loc>https://moduin.kr/category-automation.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://moduin.kr/category-smartfactory.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://moduin.kr/category-wealth.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://moduin.kr/automation/post-01.html</loc>
     <lastmod>2026-11-05</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://moduin.kr/post-02.html</loc>
+    <loc>https://moduin.kr/smartfactory/post-02.html</loc>
     <lastmod>2026-11-05</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://moduin.kr/post-03.html</loc>
+    <loc>https://moduin.kr/wealth/post-03.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://moduin.kr/smartfactory/post-04.html</loc>
+    <lastmod>2026-11-05</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://moduin.kr/automation/post-05.html</loc>
     <lastmod>2026-11-05</lastmod>
     <priority>0.8</priority>
   </url>
@@ -24,15 +49,5 @@
     <loc>https://moduin.kr/privacy.html</loc>
     <lastmod>2026-11-05</lastmod>
     <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/post-04.html</loc>
-    <lastmod>2026-11-05</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/post-05.html</loc>
-    <lastmod>2026-11-05</lastmod>
-    <priority>0.8</priority>
   </url>
 </urlset>
