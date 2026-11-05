@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트팩토리 설비 데이터 실시간 수집을 위한 OPC UA와 C# 통신 아키텍처 - moduin.kr</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.8; }
+        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; }
+        .nav-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        .container { max-width: 800px; margin: 40px auto; padding: 40px 30px; background: #fff; border-radius: 8px; border: 1px solid #e8e6e1; }
+        h1 { font-size: 1.7rem; color: #2c3e50; margin-bottom: 15px; word-break: keep-all; }
+        .meta { font-size: 0.85rem; color: #888; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        h2 { font-size: 1.3rem; color: #34495e; margin: 35px 0 15px; border-left: 4px solid #27ae60; padding-left: 10px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; }
+        ul { margin-bottom: 20px; padding-left: 20px; }
+        li { margin-bottom: 8px; font-size: 1rem; }
+        pre { background: #2d3436; color: #dfe6e9; padding: 15px; border-radius: 6px; overflow-x: auto; margin-bottom: 20px; font-size: 0.9rem; }
+        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #27ae60; padding: 15px 20px; border-radius: 4px; margin-bottom: 25px; }
+        .back-link { display: inline-block; margin-top: 35px; color: #d35400; text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 30px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="index.html" class="logo">moduin.kr</a>
+            <a href="index.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 메인으로 돌아가기</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <span style="color:#27ae60; font-weight:bold; font-size:0.85rem;">스마트팩토리 & IoT</span>
+        <h1>스마트팩토리 설비 데이터 실시간 수집을 위한 OPC UA와 C# 통신 아키텍처</h1>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin</div>
+
+        <p>제조 현장의 다양한 PLC(Programmable Logic Controller)와 산업용 센서 데이터를 상위 MES 또는 클라우드로 수집할 때, 제조사별 독자 프로토콜(MELSEC, Modbus 등)을 개별 대응하는 것은 유지보수 비용을 급증시킵니다. 본 글에서는 표준 산업용 통신 규격인 OPC UA(Open Platform Communications Unified Architecture)를 C# .NET 환경에서 안정적으로 연동하는 아키텍처를 소개합니다.</p>
+
+        <div class="highlight-box">
+            <strong>핵심 요약:</strong> 설비 데이터 수집은 폴링(Polling) 방식보다 구독(Subscription) 기반의 데이터 체인지 이벤트를 사용해야 네트워크 부하를 줄일 수 있으며, 통신 단절 시 세션 자동 복구(Auto Reconnection) 메커니즘이 필수적입니다.
+        </div>
+
+        <h2>1. OPC UA의 장점과 통신 구조</h2>
+        <p>OPC UA는 OS 독립적이며, 자체 보안 프로토콜(인증서 교환, 암호화)을 내장하고 있어 방화벽을 경유하는 공장 네트워크에서도 안전하게 통신할 수 있습니다. 노드(NodeId) 기반의 객체 지향 주소 공간을 통해 설비 태그를 계층 구조로 탐색할 수 있습니다.</p>
+
+        <h2>2. 세션 관리 및 비동기 구독 구현</h2>
+        <p>C#에서는 OPC Foundation에서 공식 제공하는 <code>Opc.Ua.Client</code> 라이브러리를 활용합니다. UI 또는 수집 엔진이 블로킹되지 않도록 비동기 세션을 유지하고, 주요 태그의 값 변화만 수신하도록 모니터링 아이템(MonitoredItem)을 등록합니다.</p>
+
+        <pre><code>// OPC UA 세션 생성 및 구독 등록 기본 골격 예시
+var endpoint = new ConfiguredEndpoint(null, new EndpointDescription("opc.tcp://192.168.1.100:4840"));
+var session = await Session.Create(config, endpoint, false, "moduin_Client", 60000, new UserIdentity(), null);
+
+var subscription = new Subscription(session.DefaultSubscription) { PublishingInterval = 1000 };
+var monitoredItem = new MonitoredItem(subscription.DefaultItem) {
+    StartNodeId = new NodeId("ns=2;s=Line1.MachineA.Temperature"),
+    AttributeId = Attributes.Value
+};
+
+monitoredItem.Notification += (item, e) => {
+    // 설비 센서값 변경 시 실행되는 콜백
+    var val = ((MonitoredItemNotification)e.NotificationValue).Value.Value;
+    DataQueue.Enqueue(val); // 인메모리 큐로 전달
+};
+
+subscription.AddItem(monitoredItem);
+session.AddSubscription(subscription);
+subscription.Create();</code></pre>
+
+        <h2>3. 현장 운영 시 필수 예외 처리</h2>
+        <ul>
+            <li><strong>KeepAlive 이벤트 핸들링:</strong> 설비 전원 OFF나 허브 장애로 연결이 끊길 경우 세션을 즉시 정리하고 지수 백오프(Exponential Backoff) 방식으로 재연결을 시도해야 합니다.</li>
+            <li><strong>타임스탬프 동기화:</strong> 설비 PLC 자체 시간(SourceTimestamp)과 수집 서버 시간(ServerTimestamp) 간의 오차를 보정하여 시계열 데이터의 신뢰성을 확보합니다.</li>
+        </ul>
+
+        <a href="index.html" class="back-link">← 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
