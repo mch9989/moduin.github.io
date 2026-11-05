@@ -61,7 +61,7 @@
         .highlight-box { 
             background: #f8f9fa; 
             border: 1px solid #e9ecef; 
-            border-left: 4px solid #27ae60; 
+            border-left: 4px solid #2980b9; 
             padding: 18px 22px; 
             border-radius: 6px; 
             margin: 25px 0; 
@@ -88,75 +88,68 @@
     <div class="container">
         <span class="tag">스마트팩토리 & MES</span>
         <h1>제조 현장 레거시 시스템과 MES 연동 시 반드시 체크할 데이터 아키텍처</h1>
-        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 9분</div>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 8분</div>
 
         <div class="toc-box">
             <h3>목차</h3>
             <ul>
-                <li><a href="#section1">1. 도입 배경: 레거시(Legacy) 공장의 현실과 딜레마</a></li>
-                <li><a href="#section2">2. 안티패턴: 직접 커넥션(Direct Connection)의 치명적 결함</a></li>
-                <li><a href="#section3">3. 완충 버퍼 계층(Staging & Queue) 아키텍처 설계</a></li>
-                <li><a href="#section4">4. 데이터 무결성과 멱등성(Idempotency) 보장 메커니즘</a></li>
-                <li><a href="#section5">5. 네트워크 단선 시 현장 엣지(Edge) 로컬 복구 전략</a></li>
+                <li><a href="#section1">1. 문제 정의: 레거시 인터페이스와 공정 중단의 위험</a></li>
+                <li><a href="#section2">2. 안티패턴: 직접 연결(Direct DB Link)의 치명적 결함</a></li>
+                <li><a href="#section3">3. 완충형 스테이징(Staging) 인터페이스 아키텍처</a></li>
+                <li><a href="#section4">4. 데이터 멱등성(Idempotency)과 상태 머신 설계</a></li>
+                <li><a href="#section5">5. 네트워크 단절 대비 로컬 버퍼링과 복구 전략</a></li>
             </ul>
         </div>
 
-        <p>수십 년간 쉼 없이 돌아가는 제조 공장에 스마트팩토리 고도화 프로젝트나 차세대 MES(Manufacturing Execution System)를 도입할 때 마주치는 최대 난제는 최신 클라우드 기술이 아니라 <strong>'오래된 레거시 시스템 및 구형 PLC와의 정합성'</strong>입니다. 현장에서는 단 5분의 시스템 지연도 라인 셧다운과 막대한 생산 손실로 이어집니다. 본 글에서는 레거시 공장의 제약을 극복하고 무중단 데이터 파이프라인을 구축했던 실무 아키텍처 노하우를 정리합니다.</p>
+        <p>수십 년간 가동된 제조 공장에 차세대 스마트팩토리 시스템이나 MES(Manufacturing Execution System)를 도입할 때 가장 큰 난관은 신기술 적용이 아니라, 현장에서 이미 24시간 돌아가고 있는 기존 '레거시(Legacy) 시스템'과의 인터페이스 정합성 확보입니다. 본 글에서는 라인 정지 위험 없이 안전하게 데이터를 통합하는 실무 아키텍처 원칙을 다룹니다.</p>
 
-        <h2 id="section1">1. 도입 배경: 레거시(Legacy) 공장의 현실과 딜레마</h2>
-        <p>이상적인 스마트팩토리 구축 가이드는 모든 설비가 표준 OPC UA나 최신 REST API를 지원한다고 가정하지만, 실제 공장 라인에는 윈도우 XP/7 시절에 도입된 제어 PC, 폐쇄망 오라클 9i/10g DB, 시리얼(RS-232/485) 통신에만 의존하는 장비들이 혼재되어 있습니다. 설비 교체 없이 상위 중앙 MES와 통신을 뚫어야 하는 상황에서 시스템 안정성을 확보하는 것이 핵심 과제입니다.</p>
+        <h2 id="section1">1. 문제 정의: 레거시 인터페이스와 공정 중단의 위험</h2>
+        <p>제조 현장의 레거시 시스템은 대부분 구형 하드웨어와 단종된 DBMS(예: Oracle 9i, MS-SQL 2000 등)에서 운용되는 경우가 흔합니다. 이러한 환경에 최신 MES가 대량의 생산 실적이나 자재 투입 트랜잭션을 무작정 요청하게 되면, CPU 병목이나 테이블 락(Lock) 경합으로 인해 설비 인터락(Interlock)이 걸리며 라인 전체가 멈추는 대형 사고로 이어집니다.</p>
 
-        <h2 id="section2">2. 안티패턴: 직접 커넥션(Direct Connection)의 치명적 결함</h2>
-        <p>가장 위험한 접근 방식은 상위 MES 애플리케이션 서버가 현장 설비 DB나 제어 PC에 직접 DB Connection Pool을 열고 <code>SELECT / INSERT</code>를 날리는 구조입니다.</p>
-        <ul>
-            <li><strong>Lock 경합 및 블로킹:</strong> 상위 시스템의 대용량 분석 쿼리가 현장의 실시간 트랜잭션을 락(Lock)으로 묶어버리면 바코드 스캔이나 라벨 발행이 멈춥니다.</li>
-            <li><strong>단일 장애점(SPOF):</strong> 현장 설비 PC가 재부팅되거나 스위칭 허브가 다운될 경우 상위 MES 서버의 커넥션 스레드가 고갈되어 전체 공장 서비스가 중단됩니다.</li>
-        </ul>
-
-        <h2 id="section3">3. 완충 버퍼 계층(Staging & Queue) 아키텍처 설계</h2>
-        <p>설비와 MES의 물리적·논리적 강결합을 끊어내기 위해 반드시 중간 완충 계층(Staging Interface Table 또는 In-Memory Queue)을 배치해야 합니다.</p>
+        <h2 id="section2">2. 안티패턴: 직접 연결(Direct DB Link)의 치명적 결함</h2>
+        <p>개발 기간 단축을 위해 상위 MES 서버가 현장 설비 PC나 구형 DB에 직접 SELECT/INSERT 쿼리를 날리도록 설계하는 것은 대표적인 안티패턴입니다.</p>
 
 <pre>
-[현장 PLC / 바코드 스캐너]
-           │ (생산 실적 발생)
-           ▼
-[엣지 PC (C# Collector Agent)] ──(단선 시)──► [로컬 SQLite 캐시 저장]
-           │                                           │
-           ▼ (정상 연결 시)                               │ (망 복구 시 동기화)
-[Staging DB (단방향 인터페이스 테이블)] ◄────────────────┘
-   - IF_FLAG: 'N'(신규) -> 'P'(처리중) -> 'Y'(완료) / 'E'(오류)
-           │
-           ▼ (비동기 배치 워커가 주기적 Poll)
-[중앙 엔터프라이즈 MES 코어 엔진]
+[나쁜 예: 직접 결합 방식]
+ 상위 MES ──(직접 쿼리 실행)──► 레거시 설비 DB
+   * 문제점: 쿼리 지연 발생 시 설비 PLC 인터페이스까지 프리징되어 라인 정지!
+
+[권장 예: 비동기 완충 버퍼 방식]
+ 상위 MES ◄──[Staging DB / Message Queue] ◄── 현장 게이트웨이 ◄── 설비 PLC
+   * 장점: 네트워크가 끊기거나 레거시가 지연되어도 중간 버퍼가 흡수하여 설비는 정상 가동
 </pre>
 
-        <h2 id="section4">4. 데이터 무결성과 멱등성(Idempotency) 보장 메커니즘</h2>
+        <h2 id="section3">3. 완충형 스테이징(Staging) 인터페이스 아키텍처</h2>
+        <p>현장 설비와 상위 시스템 간의 결합도를 낮추기 위해 반드시 중간 완충 테이블(Staging Table)을 두고 단방향 플래그 기반의 상태 머신을 구축해야 합니다.</p>
+
+<pre><code>-- 표준 인터페이스 테이블 스키마 설계 예시
+CREATE TABLE IF_EQUIP_PRODUCTION_ACTUAL (
+    IF_ID BIGINT IDENTITY(1,1) PRIMARY KEY,
+    FACTORY_CODE VARCHAR(10) NOT NULL,
+    LINE_ID VARCHAR(20) NOT NULL,
+    EQUIP_ID VARCHAR(20) NOT NULL,
+    LOT_ID VARCHAR(50) NOT NULL,
+    PRODUCT_QTY INT NOT NULL,
+    EVENT_DTTM DATETIME NOT NULL,
+    
+    -- 상태 제어 플래그 ('N': 신규, 'P': 처리중, 'Y': 성공, 'E': 에러)
+    IF_FLAG CHAR(1) DEFAULT 'N' NOT NULL,
+    RETRY_COUNT INT DEFAULT 0 NOT NULL,
+    ERROR_MSG NVARCHAR(500) NULL,
+    CREATE_DTTM DATETIME DEFAULT GETDATE(),
+    PROCESS_DTTM DATETIME NULL
+);
+
+CREATE INDEX IDX_IF_STATUS ON IF_EQUIP_PRODUCTION_ACTUAL (IF_FLAG, EVENT_DTTM);</code></pre>
+
+        <h2 id="section4">4. 데이터 멱등성(Idempotency)과 상태 머신 설계</h2>
         <div class="highlight-box">
-            <strong>현장 실무 원칙:</strong> 네트워크 타임아웃으로 인해 동일한 생산 실적 패킷이 2회 이상 재전송되더라도 DB에는 반드시 1회만 반영되어야 합니다. 이것이 멱등성 설계입니다.
+            <strong>핵심 설계 원칙:</strong> 동일한 바코드 스캔이나 생산 실적이 네트워크 타임아웃으로 인해 2번 이상 수신되더라도, 시스템 상의 재고나 실적은 오직 1번만 집계되어야 합니다.
         </div>
-        <p>인터페이스 테이블 설계 시 복합 유니크 인덱스를 지정하여 중복 적재를 원천 차단하고, 처리 상태 머신(State Machine)을 트랜잭션 단위로 묶어 처리합니다.</p>
+        <p>이를 위해 [설비코드 + LOT_ID + 공정시퀀스 + 발생시간]으로 구성된 복합 비즈니스 키를 생성하고, 상위 적재 시 중복 여부를 먼저 검증하는 멱등성(Idempotency) 필터를 통과시킵니다.</p>
 
-<pre><code>-- 멱등성을 보장하는 스테이징 테이블 처리 프로시저 패턴 예시
-BEGIN TRANSACTION;
-
--- 1. 아직 처리되지 않은 레코드 100건을 비관적 락으로 점유 (경합 방지)
-WITH CTE AS (
-    SELECT TOP (100) IF_SEQ, IF_FLAG
-    FROM TB_MES_IF_STAGING WITH (UPDLOCK, READPAST)
-    WHERE IF_FLAG = 'N'
-    ORDER BY CREATE_DTTM ASC
-)
-UPDATE CTE
-SET IF_FLAG = 'P' -- '처리중'으로 마킹
-OUTPUT inserted.IF_SEQ;
-
--- 2. 실제 MES 생산 실적 마스터 테이블로 데이터 병합 (UPSERT / MERGE)
--- 3. 정상 처리 완료 시 IF_FLAG = 'Y', 실패 시 'E' 및 에러 로그 기록
-
-COMMIT TRANSACTION;</code></pre>
-
-        <h2 id="section5">5. 네트워크 단선 시 현장 엣지(Edge) 로컬 복구 전략</h2>
-        <p>공장 내 간선 케이블 포설 구간이나 무선 AGV 라인은 일시적인 패킷 드롭이 필연적입니다. C# 기반 엣지 에이전트 내부에는 <code>Polly</code> 라이브러리를 활용한 지수 백오프 재시도(Exponential Backoff)를 구현하고, 3회 이상 실패 시 현장 SSD의 로컬 임베디드 DB(SQLite)로 저장 위치를 즉시 페일오버(Failover)하는 로직을 반드시 탑재해야 합니다.</p>
+        <h2 id="section5">5. 네트워크 단절 대비 로컬 버퍼링과 복구 전략</h2>
+        <p>공장 내 스위칭 허브 장애나 케이블 단선으로 상위 네트워크가 끊기더라도 생산은 계속되어야 합니다. 현장 게이트웨이 PC에 경량 임베디드 DB(SQLite)나 파일 기반 큐를 두어 로컬에 선 적재한 후, 연결 복구 시 지수 백오프(Exponential Backoff) 알고리즘으로 상위 스테이징 테이블로 순차 방출하는 Fail-over 아키텍처가 필수적입니다.</p>
 
         <a href="../category-smartfactory.html" class="back-link">← 스마트팩토리 칼럼 목록으로 돌아가기</a>
     </div>
