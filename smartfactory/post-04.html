@@ -43,6 +43,7 @@
         .toc-box a:hover { color: #27ae60; text-decoration: underline; }
 
         h2 { font-size: 1.35rem; color: #34495e; margin: 40px 0 15px; border-left: 4px solid #27ae60; padding-left: 12px; }
+        h3 { font-size: 1.15rem; color: #2c3e50; margin: 25px 0 10px; }
         p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; color: #3f3f3f; }
         ul, ol { margin-bottom: 20px; padding-left: 22px; }
         li { margin-bottom: 8px; font-size: 1rem; color: #444; }
@@ -92,69 +93,82 @@
         <div class="toc-box">
             <h3>목차</h3>
             <ul>
-                <li><a href="#section1">1. 표준 프로토콜의 필요성: 제조사 파편화 극복</a></li>
-                <li><a href="#section2">2. OPC UA 아키텍처: NodeId와 주소 공간 모델링</a></li>
-                <li><a href="#section3">3. 폴링(Polling) 대 구독(Subscription) 모델 성능 비교</a></li>
-                <li><a href="#section4">4. C# OPC UA 클라이언트 핵심 구현 코드</a></li>
-                <li><a href="#section5">5. 통신 단절 대비 세션 자동 복구(Auto-Reconnect) 설계</a></li>
+                <li><a href="#section1">1. 배경: 설비 이기종 통신 프로토콜의 파편화 문제</a></li>
+                <li><a href="#section2">2. OPC UA의 핵심 강점과 주소 공간 모델</a></li>
+                <li><a href="#section3">3. 폴링(Polling) 대신 구독(Subscription) 모델을 써야 하는 이유</a></li>
+                <li><a href="#section4">4. C# OPC Foundation SDK 클라이언트 구현 실무</a></li>
+                <li><a href="#section5">5. 네트워크 단선 대비 자동 재접속(Auto Reconnect) 구현</a></li>
             </ul>
         </div>
 
-        <p>스마트팩토리 현장에는 미쓰비시(MELSEC), 지멘스(S7), LS산전(XGT), 오므론 등 다양한 제조사의 PLC가 존재합니다. 각 PLC마다 독자적인 시리얼 또는 이더넷 프로토콜을 개별 구현하는 방식은 설비 추가 시마다 개발 비용을 눈덩이처럼 불립니다. 본 글에서는 산업용 통신 표준인 OPC UA(Open Platform Communications Unified Architecture)를 도입하여 C# 기반 수집 시스템을 표준화한 과정을 설명합니다.</p>
+        <p>현대 스마트팩토리의 제조 라인에는 지멘스(Siemens), 미쓰비시(MELSEC), 오므론(Omron), LS일렉트릭 등 다양한 제조사의 PLC(Programmable Logic Controller)가 혼재되어 있습니다. 이들 장비에서 온도, 압력, 사이클 타임, 불량 카운트 데이터를 수집할 때마다 제조사 전용 프로토콜을 개별 구현하는 것은 극심한 유지보수 재앙을 초래합니다. 본 글에서는 산업 표준 통신 규격인 OPC UA(Open Platform Communications Unified Architecture)를 활용해 C# .NET 환경에서 견고한 데이터 수집 게이트웨이를 구축하는 방안을 다룹니다.</p>
 
-        <h2 id="section1">1. 표준 프로토콜의 필요성: 제조사 파편화 극복</h2>
-        <p>OPC UA는 윈도우 종속적이었던 과거 OPC DA(DCOM 기반)의 한계를 벗어나 Linux, 임베디드, 클라우드 환경에서도 작동하며 방화벽 친화적인 바이너리 TCP(opc.tcp) 포트를 사용합니다. 인증서 교환을 통한 하드웨어 레벨 보안 암호화가 기본 내장되어 공장 내 보안 망 분리 요건을 만족합니다.</p>
+        <h2 id="section1">1. 배경: 설비 이기종 통신 프로토콜의 파편화 문제</h2>
+        <p>과거의 OPC DA(Data Access)는 윈도우 OS의 DCOM 기술에 종속되어 있어 방화벽을 넘나드는 통신 설정이 매우 까다로웠고 보안 취약점이 컸습니다. 반면 OPC UA는 플랫폼 독립적인 TCP 기반 바이너리 프로토콜(opc.tcp)을 사용하며, 자체적인 x509 인증서 기반 암호화와 사용자 인증 계층을 완벽히 내장하고 있습니다.</p>
 
-        <h2 id="section2">2. OPC UA 아키텍처: NodeId와 주소 공간 모델링</h2>
-        <p>모든 설비의 센서값, 모터 RPM, 알람 상태는 계층적 객체 노드(NodeId)로 매핑됩니다. 예를 들어 <code>ns=2;s=Line1.Furnace01.Temperature</code>와 같이 네임스페이스와 문자열 키로 직관적인 탐색(Browse)이 가능합니다.</p>
+        <h2 id="section2">2. OPC UA의 핵심 강점과 주소 공간 모델</h2>
+        <p>OPC UA는 데이터를 단순한 메모리 번지(예: D100, M20)가 아니라, 계층 구조를 갖춘 노드(NodeId) 객체로 추상화합니다. 상위 애플리케이션은 <code>ns=2;s=Line1.MachineA.SpindleSpeed</code>와 같이 직관적인 네임스페이스와 식별자를 통해 설비 데이터를 탐색할 수 있습니다.</p>
 
-        <h2 id="section3">3. 폴링(Polling) 대 구독(Subscription) 모델 성능 비교</h2>
-        <div class="highlight-box">
-            <strong>네트워크 최적화:</strong> 타이머를 돌려 매초 수천 개의 태그를 조회하는 폴링 방식은 대역폭을 낭비하고 PLC CPU에 과부하를 줍니다. 값이 실제로 변할 때만 이벤트를 밀어주는 <strong>Subscription & MonitoredItem</strong> 모델을 사용해야 합니다.
-        </div>
+<pre>
+[다양한 현장 설비 PLC (지멘스, 미쓰비시, LS)]
+               │ (독자 필드버스 프로토콜)
+               ▼
+[현장 OPC UA Server (Kepware, 설비 내장 서버)]
+               │
+               │ (opc.tcp 암호화 세션 / 4840 포트)
+               ▼
+[C# .NET 데이터 수집 게이트웨이 서비스]
+   ├─► Session Manager (연결 상태 감시 / Keep-Alive)
+   ├─► Subscription Manager (값 변경 이벤트 수신)
+   └─► Data Dispatcher (인메모리 버퍼 ──► 상위 MES / TSDB 전송)
+</pre>
 
-        <h2 id="section4">4. C# OPC UA 클라이언트 핵심 구현 코드</h2>
-        <p>OPC Foundation 공식 .NET 라이브러리를 사용해 안전한 비동기 세션을 맺고 구독을 등록하는 프로덕션 레벨 코드 구조입니다.</p>
+        <h2 id="section3">3. 폴링(Polling) 대신 구독(Subscription) 모델을 써야 하는 이유</h2>
+        <p>1,000개의 센서 태그를 수집할 때 매초마다 타이머를 돌려 읽어오는 폴링 방식은 대역폭 낭비와 PLC CPU 과부하를 유발합니다. OPC UA의 <strong>구독(Subscription)</strong> 메커니즘을 사용하면, 서버 측에서 데이터가 실제로 변경되었을 때만(DataChangeNotification) 클라이언트로 이벤트를 푸시해주므로 트래픽을 90% 이상 절감할 수 있습니다.</p>
 
-<pre><code>// OPC UA 세션 생성 및 구독 등록 실무 패턴
-public async Task StartMonitoringAsync(string serverUrl, CancellationToken ct)
+        <h2 id="section4">4. C# OPC Foundation SDK 클라이언트 구현 실무</h2>
+        <p>공식 <code>Opc.Ua.Client</code> 라이브러리를 활용해 세션을 생성하고 태그 변경 이벤트를 등록하는 실무 코드 구조입니다.</p>
+
+<pre><code>// 1. 엔드포인트 설정 및 세션 생성
+var endpoint = new ConfiguredEndpoint(null, new EndpointDescription("opc.tcp://192.168.1.100:4840"));
+var session = await Session.Create(config, endpoint, false, "moduin_Collector", 60000, new UserIdentity(), null);
+
+// 2. 1000ms 간격의 구독(Subscription) 등록
+var subscription = new Subscription(session.DefaultSubscription) 
+{ 
+    PublishingInterval = 1000, 
+    PublishingEnabled = true 
+};
+
+// 3. 모니터링할 센서 노드 정의
+var monitoredItem = new MonitoredItem(subscription.DefaultItem)
 {
-    var config = new ApplicationConfiguration { /* 보안 인증서 및 클라이언트 설정 */ };
-    var endpoint = new ConfiguredEndpoint(null, new EndpointDescription(serverUrl));
+    DisplayName = "SpindleTemperature",
+    StartNodeId = new NodeId("ns=2;s=Line1.Motor.Temperature"),
+    AttributeId = Attributes.Value,
+    SamplingInterval = 500 // 설비 내부 샘플링 주기
+};
 
-    using var session = await Session.Create(config, endpoint, false, "moduin_EdgeCollector", 60000, new UserIdentity(), null);
-
-    // 1초 주기의 구독 컨테이너 생성
-    var subscription = new Subscription(session.DefaultSubscription)
+// 4. 값 변경 시 호출되는 이벤트 콜백 연결
+monitoredItem.Notification += (item, e) =>
+{
+    if (e.NotificationValue is MonitoredItemNotification notification)
     {
-        PublishingInterval = 1000,
-        PublishingEnabled = true
-    };
+        var val = notification.Value.WrappedValue.Value;
+        var sourceTime = notification.Value.SourceTimestamp;
+        // 인메모리 큐로 전달하여 상위 DB 적재
+        _sensorBuffer.Enqueue(new SensorData("TEMP", val, sourceTime));
+    }
+};
 
-    // 모니터링할 센서 노드 등록 (데드밴드 설정: 온도 변화 0.5도 이상일 때만 트리거)
-    var monitoredItem = new MonitoredItem(subscription.DefaultItem)
-    {
-        StartNodeId = new NodeId("ns=2;s=AssemblyLine.MachineA.Sensor.Temperature"),
-        AttributeId = Attributes.Value,
-        SamplingInterval = 500,
-        QueueSize = 10,
-        DiscardOldest = true
-    };
+subscription.AddItem(monitoredItem);
+session.AddSubscription(subscription);
+await subscription.CreateAsync();</code></pre>
 
-    monitoredItem.Notification += (item, e) =>
-    {
-        var val = ((MonitoredItemNotification)e.NotificationValue).Value;
-        // In-Memory Queue로 안전하게 전달하여 수집 스레드 분리
-        DataPipeline.Enqueue(new SensorData(item.ResolvedNodeId.ToString(), val.Value, val.SourceTimestamp));
-    };
-
-    subscription.AddItem(monitoredItem);
-    session.AddSubscription(subscription);
-    await subscription.CreateAsync(ct);
-}</code></pre>
-
-        <h2 id="section5">5. 통신 단절 대비 세션 자동 복구(Auto-Reconnect) 설계</h2>
-        <p>현장 유지보수 작업 중 스위치 리셋이나 설비 전원 차단 시 세션이 즉시 유실됩니다. <code>KeepAlive</code> 이벤트를 모니터링하여 연결이 끊어지면 기존 세션을 안전하게 폐기하고 지수 백오프 기반으로 백그라운드 재접속을 시도하는 핸들러를 반드시 구성해야 합니다.</p>
+        <h2 id="section5">5. 네트워크 단선 대비 자동 재접속(Auto Reconnect) 구현</h2>
+        <div class="highlight-box">
+            <strong>현장 필수 예외 처리:</strong> 공장 현장은 용접 노이즈나 허브 순단으로 네트워크가 수시로 끊깁니다. <code>Session.KeepAlive</code> 이벤트를 감시하여 통신 실패를 감지하면, 즉시 기존 세션을 정리하고 백그라운드에서 지수 백오프(Exponential Backoff) 방식으로 안전하게 재연결을 시도해야 시스템 중단을 막을 수 있습니다.
+        </div>
 
         <a href="../category-smartfactory.html" class="back-link">← 스마트팩토리 칼럼 목록으로 돌아가기</a>
     </div>
