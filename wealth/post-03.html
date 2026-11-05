@@ -21,6 +21,7 @@
         .back-link { display: inline-block; margin-top: 35px; color: #d35400; text-decoration: none; font-weight: bold; }
         footer { text-align: center; padding: 30px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
     </style>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -32,7 +33,7 @@
     <header>
         <div class="nav-inner">
             <a href="../index.html" class="logo">moduin.kr</a>
-            <a href="../index.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 메인으로 돌아가기</a>
+            <a href="../category-wealth.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 목록으로 돌아가기</a>
         </div>
     </header>
 
@@ -41,22 +42,19 @@
         <h1>증권사 OpenAPI 연동 기반 C# 퀀트 스크리닝 시스템 아키텍처</h1>
         <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin</div>
 
-        <p>개인 투자자가 감정에 휘둘리지 않고 원칙적인 자산 배분을 수행하기 위해 가장 필요한 도구는 정량적 데이터 기반의 스크리닝 시스템입니다. 본 글에서는 국내 증권사 OpenAPI와 C# .NET 환경을 결합해 실시간 시세 처리 및 종목 필터링 엔진을 설계한 실무 노하우를 정리합니다.</p>
+        <p>감정에 휘둘리지 않고 원칙적인 자산 배분을 수행하기 위해 필요한 도구는 데이터 기반 스크리닝 시스템입니다. 국내 증권사 OpenAPI와 C# .NET 환경을 결합해 실시간 시세 처리 및 필터링 엔진을 설계한 노하우를 정리합니다.</p>
 
         <div class="highlight-box">
-            <strong>핵심 요약:</strong> 증권사 API의 초당 호출 제한(TR Rate Limit)과 이벤트 기반 UI 스레드 프리징을 방지하기 위해서는 생산자-소비자(Producer-Consumer) 패턴과 비동기 큐잉 구조가 필수적입니다.
+            <strong>핵심 요약:</strong> 증권사 API의 초당 호출 제한(Rate Limit)과 UI 스레드 프리징을 방지하기 위해서는 생산자-소비자(Producer-Consumer) 패턴과 비동기 큐잉 구조가 필수적입니다.
         </div>
 
         <h2>1. COM 객체 이벤트와 UI 스레드 분리</h2>
-        <p>키움증권 등 다수의 레거시 증권사 모듈은 32비트 기반 ActiveX/OCX 인터페이스를 사용합니다. 데이터 수신 이벤트(OnReceiveTrData)에서 무거운 지표 계산을 직접 수행하면 윈도우 폼 전체가 멈추게 됩니다. 이벤트 핸들러에서는 순수 데이터만 추출하여 메모리 큐(ConcurrentQueue)로 전달하고, 별도의 백그라운드 워커 스레드에서 기술적 지표를 계산해야 합니다.</p>
+        <p>키움증권 등 ActiveX 인터페이스의 이벤트 핸들러(OnReceiveTrData)에서는 데이터만 추출해 ConcurrentQueue로 넘기고 백그라운드 스레드에서 지표를 계산해야 윈폼이 멈추지 않습니다.</p>
 
         <h2>2. 초당 호출 제한(TR Limit) 제어 엔진</h2>
-        <p>전 종목 재무제표나 일봉 차트를 긁어올 때 발생하는 가장 빈번한 오류는 조회 횟수 초과로 인한 API 차단입니다. 타이머 기반의 지연 방식 대신 토큰 버킷(Token Bucket) 알고리즘을 적용하여 안정적인 초당 전송률(초당 3~5회)을 하드웨어 레벨에서 보장했습니다.</p>
+        <p>토큰 버킷(Token Bucket) 알고리즘을 적용하여 안정적인 초당 전송률(초당 3~5회)을 보장합니다.</p>
 
-        <h2>3. 백테스팅과 데이터베이스 적재</h2>
-        <p>수집된 틱 및 분봉 데이터는 로컬 MS-SQL 또는 경량 SQLite에 파티셔닝 적재되어 과거 특정 국면(금리 인상기, 하락장)에서의 조건식 성과를 검증하는 백테스팅 데이터셋으로 활용됩니다.</p>
-
-        <a href="../index.html" class="back-link">← 목록으로 돌아가기</a>
+        <a href="../index.html" class="back-link">← 메인 대문으로 돌아가기</a>
     </div>
 
     <footer>
