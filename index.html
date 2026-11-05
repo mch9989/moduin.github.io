@@ -24,14 +24,18 @@
             text-align: center;
         }
 
-        /* 대표 이미지 영역 */
+        /* 대표 이미지 영역 (코드로 하단 잘라내기) */
         .hero-image {
             width: 100%;
             max-height: 500px;
             object-fit: cover;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
+            
+            /* 마법의 코드: 이미지 맨 아래에서부터 18% 영역을 투명하게 잘라버립니다 */
+            clip-path: inset(0 0 18% 0);
+            /* 잘려나간 밑부분의 빈 공간만큼 아래 버튼들을 위로 바짝 당겨옵니다 */
+            margin-bottom: -7%; 
         }
 
         /* 타이틀 및 소개 */
