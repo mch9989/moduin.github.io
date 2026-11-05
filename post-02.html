@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제조 현장 레거시 시스템과 MES 연동 시 반드시 체크할 데이터 아키텍처 - moduin.kr</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.8; }
+        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; }
+        .nav-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        .container { max-width: 800px; margin: 40px auto; padding: 40px 30px; background: #fff; border-radius: 8px; border: 1px solid #e8e6e1; }
+        h1 { font-size: 1.7rem; color: #2c3e50; margin-bottom: 15px; word-break: keep-all; }
+        .meta { font-size: 0.85rem; color: #888; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        h2 { font-size: 1.3rem; color: #34495e; margin: 35px 0 15px; border-left: 4px solid #27ae60; padding-left: 10px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; }
+        ul, ol { margin-bottom: 20px; padding-left: 20px; }
+        li { margin-bottom: 8px; font-size: 1rem; }
+        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #2980b9; padding: 15px 20px; border-radius: 4px; margin-bottom: 25px; }
+        .back-link { display: inline-block; margin-top: 35px; color: #d35400; text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 30px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="index.html" class="logo">moduin.kr</a>
+            <a href="index.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 메인으로 돌아가기</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <span style="color:#27ae60; font-weight:bold; font-size:0.85rem;">스마트팩토리 & MES</span>
+        <h1>제조 현장 레거시 시스템과 MES 연동 시 반드시 체크할 데이터 아키텍처</h1>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin</div>
+
+        <p>수십 년간 가동된 제조 공장에 차세대 스마트팩토리 시스템이나 MES(제조실행시스템)를 도입할 때 가장 큰 장벽은 신규 기술이 아니라, 기존의 '레거시(Legacy) 시스템'과의 인터페이스 정합성입니다.</p>
+
+        <div class="highlight-box">
+            <strong>핵심 요약:</strong> 설비 PLC나 레거시 DB와의 직접 커넥션은 장애 전파의 주원인입니다. 중간 완충 버퍼(Staging DB 또는 Queue)를 설계하고 데이터 멱등성을 보장해야 라인 중단을 방지할 수 있습니다.
+        </div>
+
+        <h2>1. 직접 결합(Direct Connection)의 위험성</h2>
+        <p>개발 편의성을 이유로 상위 MES 서버가 현장 설비 PC나 구형 DB에 직접 SELECT/INSERT 쿼리를 날리도록 설계하는 실수를 자주 범합니다. 이 방식은 네트워크 단선이나 레거시 DB의 락(Lock) 경합 발생 시 즉시 생산 라인 정지로 이어집니다.</p>
+
+        <h2>2. 스테이징(Staging) 인터페이스 테이블 설계</h2>
+        <p>안정적인 연동을 위해 반드시 지켜야 할 기본 아키텍처 원칙입니다:</p>
+        <ul>
+            <li><strong>단방향 플래그 기반 처리:</strong> 원본 데이터에 직접 손대지 않고 <code>IF_FLAG ('N' -> 'P' -> 'Y' / 'E')</code> 패턴의 상태 머신을 둡니다.</li>
+            <li><strong>트랜잭션 격리:</strong> 대량의 실적 집계 쿼리가 현장 수집 프로세스를 블로킹하지 않도록 <code>NOLOCK</code> 힌트 또는 Read-Committed Snapshot 격리 수준을 분리합니다.</li>
+            <li><strong>네트워크 단절 대비 로컬 버퍼링:</strong> 현장 게이트웨이 PC에 경량 버퍼(SQLite, File Queue 등)를 두어 통신 복구 시 누락 없이 재전송되도록 구현합니다.</li>
+        </ul>
+
+        <h2>3. 멱등성(Idempotency)의 중요성</h2>
+        <p>공정 데이터 전송 중 타임아웃이 발생해 동일한 바코드 스캔이나 생산 실적이 재전송되었을 때, 중복으로 적재되지 않도록 유니크 키(라인 ID + 설비코드 + 타임스탬프 + 시퀀스)를 통한 중복 검증 로직이 시스템 레벨에 내장되어야 합니다.</p>
+
+        <a href="index.html" class="back-link">← 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
