@@ -43,6 +43,7 @@
         .toc-box a:hover { color: #8e44ad; text-decoration: underline; }
 
         h2 { font-size: 1.35rem; color: #34495e; margin: 40px 0 15px; border-left: 4px solid #8e44ad; padding-left: 12px; }
+        h3 { font-size: 1.15rem; color: #2c3e50; margin: 25px 0 10px; }
         p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; color: #3f3f3f; }
         ul, ol { margin-bottom: 20px; padding-left: 22px; }
         li { margin-bottom: 8px; font-size: 1rem; color: #444; }
@@ -87,85 +88,88 @@
     <div class="container">
         <span class="tag">자산관리 & 알고리즘</span>
         <h1>증권사 OpenAPI 연동 기반 C# 퀀트 스크리닝 시스템 아키텍처</h1>
-        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 8분</div>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 9분</div>
 
         <div class="toc-box">
             <h3>목차</h3>
             <ul>
-                <li><a href="#section1">1. 정량적 투자 시스템 구축이 필요한 이유</a></li>
-                <li><a href="#section2">2. 레거시 COM(ActiveX)과 비동기 백엔드의 결합</a></li>
-                <li><a href="#section3">3. TR 초당 전송 제한: 토큰 버킷(Token Bucket) 제어기</a></li>
-                <li><a href="#section4">4. 고속 시세 수집을 위한 생산자-소비자(Producer-Consumer) 패턴</a></li>
-                <li><a href="#section5">5. 백테스팅을 위한 시계열 DB 적재 및 모니터링</a></li>
+                <li><a href="#section1">1. 문제 정의: 감정을 배제한 정량적 데이터 스크리닝의 필요성</a></li>
+                <li><a href="#section2">2. 전체 시스템 아키텍처 (생산자-소비자 패턴)</a></li>
+                <li><a href="#section3">3. 레거시 COM(OCX) 이벤트와 UI 스레드 프리징 분리</a></li>
+                <li><a href="#section4">4. 초당 호출 제한(TR Limit) 제어를 위한 토큰 버킷 알고리즘</a></li>
+                <li><a href="#section5">5. 시계열 데이터 DB 적재 및 백테스팅 파이프라인</a></li>
             </ul>
         </div>
 
-        <p>감정에 휘둘리는 매매를 배제하고 원칙적인 자산 배분을 실현하려면 정량적 재무 지표와 가격 모멘텀을 실시간으로 추적하는 시스템이 필수적입니다. 국내 대다수 증권사 API는 여전히 32비트 COM(ActiveX) 모듈 기반으로 동작하기 때문에 고속 멀티스레드 환경과의 결합 시 병목이 발생하기 쉽습니다. 본 글에서는 C# .NET 환경에서 안정적인 퀀트 스크리닝 엔진을 구축한 설계 과정을 공유합니다.</p>
+        <p>개인 투자자가 금융 시장에서 장기적으로 살아남기 위해 가장 경계해야 할 적은 시장의 변동성이 아니라 본인의 감정과 편향입니다. 주관적 뉴스나 호재에 휘둘리지 않고 철저한 계량 데이터에 기반해 종목을 발굴하기 위해서는 독자적인 스크리닝 시스템이 필요합니다. 본 글에서는 국내 레거시 증권사 OpenAPI(키움증권 등)와 C# .NET 환경을 결합해 실시간 시세를 수집하고 조건식으로 필터링하는 실무 아키텍처를 소개합니다.</p>
 
-        <h2 id="section1">1. 정량적 투자 시스템 구축이 필요한 이유</h2>
-        <p>시장에는 2,500개가 넘는 종목이 존재하며 장중 쏟아지는 시세 틱(Tick) 데이터는 사람의 인지 한계를 넘어섭니다. ROE, 부채비율, 영업이익률 등 기본적 펀더멘털과 이동평균선, 볼린저 밴드 등 기술적 지표를 결합한 스크리닝을 완전 무인으로 가동하는 것이 시스템 구축의 주 목적입니다.</p>
+        <h2 id="section1">1. 문제 정의: 감정을 배제한 정량적 데이터 스크리닝의 필요성</h2>
+        <p>국내 상장 종목 2,500여 개를 대상으로 PER, PBR, 영업이익률, 모멘텀 지표, 외인/기관 순매수 수급을 수동으로 점검하는 것은 물리적으로 불가능합니다. HTS 기본 조건검색은 복합적인 시계열 통계나 과거 특정 국면에서의 백테스팅을 유연하게 검증하는 데 한계가 있습니다. 결국 자체 시스템을 통해 로우 데이터를 직접 쥐고 있어야 원하는 로직을 제약 없이 구동할 수 있습니다.</p>
 
-        <h2 id="section2">2. 레거시 COM(ActiveX)과 비동기 백엔드의 결합</h2>
-        <p>증권사 API의 핵심 문제는 <strong>단일 스레드 아파트먼트(STA)</strong> 모델에서만 이벤트가 발생한다는 점입니다. 무거운 수식 계산이나 DB 저장을 이벤트 핸들러(<code>OnReceiveTrData</code>) 내부에서 직접 수행하면 윈도우 폼 전체가 굳어버리며 패킷 누락이 발생합니다.</p>
+        <h2 id="section2">2. 전체 시스템 아키텍처 (생산자-소비자 패턴)</h2>
+        <p>증권사 API의 초당 전송 제한과 고속 틱(Tick) 데이터 수신 환경에서 윈도우 폼이 멈추지 않도록 스레드를 완전 분리한 생산자-소비자(Producer-Consumer) 아키텍처입니다.</p>
 
 <pre>
-[증권사 서버] ──(시세 틱 발생)──► [STA 메인 UI 스레드 (ActiveX 수신)]
-                                              │
-                                              ▼ (순수 데이터만 추출 후 즉시 반환)
-                                  [ConcurrentQueue&lt;TickData&gt;]
-                                              │
-                    ┌─────────────────────────┴─────────────────────────┐
-                    ▼                                                   ▼
-       [워커 스레드 1: 퀀트 지표 산출]                      [워커 스레드 2: SQLite 시계열 적재]
-       (이동평균, RSI, 돌파 시그널)                         (전일 대비 거래량 집계)
+[증권사 서버 (OpenAPI 서버)]
+          │ (실시간 시세 수신 / TR 응답)
+          ▼
+[1. STA 스레드 (COM ActiveX 이벤트 핸들러)] ──► UI 블로킹 원천 배제
+          │
+          ▼ (원시 패킷 고속 Enqueue)
+[2. 인메모리 버퍼: ConcurrentQueue&lt;MarketTickData&gt;]
+          │
+          ├─────────────────────────────────────────┐
+          ▼ (Background Worker Task 1)              ▼ (Background Worker Task 2)
+[3. 기술적 지표 / 수급 퀀트 필터링 엔진]     [4. SQLite / MS-SQL 시계열 적재]
+          │
+          ▼ (조건 부합 종목 검출 시)
+[5. 실시간 UI 대시보드 알림 (Invoke) 및 텔레그램 전송]
 </pre>
 
-        <h2 id="section3">3. TR 초당 전송 제한: 토큰 버킷(Token Bucket) 제어기</h2>
-        <div class="highlight-box">
-            <strong>핵심 제약 사항:</strong> 증권사는 과도한 시세 조회를 막기 위해 1초당 조회 횟수를 엄격히 제한(예: 초당 5회)하며, 이를 위반할 경우 즉시 IP 차단이나 세션 종료 페널티를 부과합니다.
-        </div>
-        <p>무조건 <code>Thread.Sleep()</code>을 주는 비효율적인 방식 대신, 아래와 같이 정밀한 토큰 버킷(Token Bucket) 레이트 리미터를 C#으로 구현하여 처리량을 극대화합니다.</p>
+        <h2 id="section3">3. 레거시 COM(OCX) 이벤트와 UI 스레드 프리징 분리</h2>
+        <p>국내 주요 증권사 모듈은 여전히 32비트 기반의 STA(Single-Threaded Apartment) COM 인터페이스로 구동됩니다. 데이터 수신 이벤트인 <code>OnReceiveTrData</code>나 <code>OnReceiveRealData</code> 내부에서 무거운 지표 계산, LINQ 필터링, DB 저장을 직접 수행하면 UI 메시지 펌프가 멈춰 화면 전체가 '응답 없음' 상태에 빠집니다.</p>
 
-<pre><code>public class TokenBucketRateLimiter
+<pre><code>// 1. 이벤트 핸들러에서는 순수 데이터만 추출하여 큐로 넘김
+private void axKHOpenAPI_OnReceiveTrData(object sender, AxKHOpenAPILib._DKHOpenAPIEvents_OnReceiveTrDataEvent e)
 {
-    private readonly int _maxTokens;
-    private readonly double _refillRatePerMillisecond;
-    private double _currentTokens;
-    private DateTime _lastRefillTime;
-    private readonly object _lock = new();
+    // 긴 연산 금지: 원시 텍스트만 파싱하여 즉시 객체화
+    var price = int.Parse(axKHOpenAPI.GetCommData(e.sTrCode, e.sRQName, 0, "현재가").Trim().Replace("-", ""));
+    var volume = long.Parse(axKHOpenAPI.GetCommData(e.sTrCode, e.sRQName, 0, "거래량").Trim());
 
-    public TokenBucketRateLimiter(int maxTokens, TimeSpan refillPeriod)
-    {
-        _maxTokens = maxTokens;
-        _refillRatePerMillisecond = (double)maxTokens / refillPeriod.TotalMilliseconds;
-        _currentTokens = maxTokens;
-        _lastRefillTime = DateTime.UtcNow;
-    }
+    _tickQueue.Enqueue(new RawMarketData 
+    { 
+        ItemCode = e.sRQName, 
+        Price = price, 
+        Volume = volume, 
+        ReceivedTime = DateTime.Now 
+    });
+}
 
-    public async Task WaitForTokenAsync()
+// 2. 백그라운드 태스크에서 비동기로 큐를 소비하며 퀀트 연산 수행
+private async Task ProcessMarketDataAsync(CancellationToken ct)
+{
+    while (!ct.IsCancellationRequested)
     {
-        while (true)
+        if (_tickQueue.TryDequeue(out var data))
         {
-            lock (_lock)
-            {
-                var now = DateTime.UtcNow;
-                var elapsed = (now - _lastRefillTime).TotalMilliseconds;
-                _currentTokens = Math.Min(_maxTokens, _currentTokens + (elapsed * _refillRatePerMillisecond));
-                _lastRefillTime = now;
-
-                if (_currentTokens &gt;= 1.0)
-                {
-                    _currentTokens -= 1.0;
-                    return; // 요청 허용
-                }
-            }
-            await Task.Delay(50); // 토큰 충전 대기
+            // 이동평균, 볼린저밴드, 수급 모멘텀 스코어링 계산
+            EvaluateQuantStrategy(data);
+        }
+        else
+        {
+            await Task.Delay(10, ct); // CPU 과점 방지
         }
     }
 }</code></pre>
 
-        <h2 id="section4">4. 고속 시세 수집을 위한 생산자-소비자 패턴</h2>
-        <p>이벤트가 발생하는 즉시 <code>System.Threading.Channels</code> 또는 <code>BlockingCollection&lt;T&gt;</code>으로 밀어 넣고, 백그라운드 태스크가 이를 컨슘하여 퀀트 필터링 로직을 수행합니다. 이를 통해 장 시작 직후 시세가 폭발하는 구간에서도 UI 프리징 없이 초당 수만 건의 틱 데이터를 유실 없이 처리할 수 있습니다.</p>
+        <h2 id="section4">4. 초당 호출 제한(TR Limit) 제어를 위한 토큰 버킷 알고리즘</h2>
+        <div class="highlight-box">
+            <strong>핵심 트러블슈팅:</strong> 증권사 API는 통상 '1초당 5회', '1시간당 1,000회' 등 엄격한 TR 제한을 둡니다. 이를 위반하면 프로그램이 강제 접속 종료(블랙리스트) 처리됩니다.
+        </div>
+        <p>단순 <code>Thread.Sleep</code>은 요청 간격을 경직되게 만들어 전체 조회 시간을 불필요하게 늘립니다. 정교한 <strong>토큰 버킷(Token Bucket)</strong> 알고리즘을 구현하여 허용 범위 내에서 순간 버스트(Burst) 요청을 처리하면서도 초당 제한을 절대 초과하지 않도록 호출기를 설계해야 합니다.</p>
+
+        <h2 id="section5">5. 시계열 데이터 DB 적재 및 백테스팅 파이프라인</h2>
+        <p>수집된 호가 잔량 및 틱 데이터는 일 단위 파티셔닝된 SQLite 또는 로컬 MS-SQL에 기록됩니다. 데이터가 축적되면 "코스피 지수가 20일선 아래에 위치할 때 저PBR 고ROE 종목의 5일 보유 수익률"과 같은 전략을 과거 데이터로 신속히 검증하는 자체 백테스팅 엔진의 밑거름이 됩니다.</p>
 
         <a href="../category-wealth.html" class="back-link">← 자산관리 칼럼 목록으로 돌아가기</a>
     </div>
