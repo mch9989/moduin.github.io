@@ -22,6 +22,7 @@
         .back-link { display: inline-block; margin-top: 35px; color: #d35400; text-decoration: none; font-weight: bold; }
         footer { text-align: center; padding: 30px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
     </style>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -33,7 +34,7 @@
     <header>
         <div class="nav-inner">
             <a href="../index.html" class="logo">moduin.kr</a>
-            <a href="../index.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 메인으로 돌아가기</a>
+            <a href="../category-automation.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 목록으로 돌아가기</a>
         </div>
     </header>
 
@@ -42,53 +43,30 @@
         <h1>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴</h1>
         <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin</div>
 
-        <p>가비지 컬렉터(Garbage Collector)가 메모리를 자동 관리해 주는 .NET 환경에서도 장시간 구동되는 제조 현장 모니터링 시스템이나 대용량 배치 프로세스에서는 OutOfMemoryException(OOM)이 발생하기 쉽습니다. 비관리 리소스 해제 누락과 잘못된 이벤트 구독 구조가 주요 원인입니다.</p>
+        <p>가비지 컬렉터가 메모리를 자동 관리하는 .NET 환경에서도 비관리 리소스 해제 누락과 이벤트 구독 유지는 치명적인 OOM을 유발합니다.</p>
 
         <div class="highlight-box">
-            <strong>핵심 요약:</strong> DB 커넥션, 네트워크 소켓, 비트맵 이미지 등 비관리 핸들을 다룰 때는 표준 Dispose 패턴을 엄격히 준수해야 하며, 대용량 버퍼는 LOH(Large Object Heap) 단편화를 방지하기 위해 <code>ArrayPool&lt;T&gt;</code>을 적극 활용해야 합니다.
+            <strong>핵심 요약:</strong> DB 커넥션, 네트워크 소켓 등 비관리 핸들은 표준 Dispose 패턴을 준수하고, 대용량 버퍼는 <code>ArrayPool&lt;T&gt;</code>을 통해 메모리를 재사용해야 합니다.
         </div>
 
-        <h2>1. 메모리 누수의 주범: 이벤트 핸들러 참조 유지</h2>
-        <p>게시자(Publisher)와 구독자(Subscriber) 객체 간의 강한 참조 관계 때문에 구독자가 더 이상 필요하지 않아도 GC 대상에서 제외되는 현상이 빈번합니다. 수명이 긴 서비스 객체에 윈도우 폼이나 컨트롤의 이벤트를 등록할 때는 반드시 이벤트 구독 해제(<code>-=</code>)를 명시하거나 WeakEventManager 패턴을 적용해야 합니다.</p>
-
-        <h2>2. 정석 표준 IDisposable 패턴 구현</h2>
-        <p>파생 클래스 확장성과 소멸자(Finalizer) 호출을 모두 고려한 표준 패턴 구조 예시입니다.</p>
-
-        <pre><code>public class HeavyResourceManager : IDisposable
+        <h2>1. 표준 IDisposable 구현 골격</h2>
+<pre><code>public class HeavyResourceManager : IDisposable
 {
     private bool _disposed = false;
-    private SafeHandle _safeHandle; // 비관리 리소스 핸들
-
     public void Dispose()
     {
         Dispose(true);
-        GC.SuppressFinalize(this); // 이미 정리되었으므로 GC 소멸자 호출 억제
+        GC.SuppressFinalize(this);
     }
-
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed) return;
-
-        if (disposing)
-        {
-            // 관리 리소스 정리 (예: 다른 IDisposable 구현 객체)
-        }
-
-        // 비관리 리소스 직접 해제
-        _safeHandle?.Dispose();
+        // 리소스 정리 로직
         _disposed = true;
-    }
-
-    ~HeavyResourceManager()
-    {
-        Dispose(false);
     }
 }</code></pre>
 
-        <h2>3. LOH 단편화와 ArrayPool 활용</h2>
-        <p>85,000바이트 이상의 대형 객체는 LOH 영역에 직접 할당되어 컴팩션(Compaction) 비용이 크게 발생합니다. 대량의 파일 I/O나 패킷 버퍼링이 반복되는 구간에서는 <code>ArrayPool&lt;byte&gt;.Shared.Rent()</code>를 통해 메모리를 재사용하고 작업 후 <code>Return()</code> 처리하는 구조가 메모리 안정성을 보장합니다.</p>
-
-        <a href="../index.html" class="back-link">← 목록으로 돌아가기</a>
+        <a href="../index.html" class="back-link">← 메인 대문으로 돌아가기</a>
     </div>
 
     <footer>
