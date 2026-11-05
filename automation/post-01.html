@@ -6,26 +6,66 @@
     <title>C# .NET과 제미나이 API를 활용한 업무 자동화 파이프라인 구축기 - moduin.kr</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.85; }
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            background: #faf9f7; 
+            color: #333; 
+            line-height: 1.85; 
+        }
         header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
         .nav-inner { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
-        .container { max-width: 860px; margin: 40px auto; padding: 45px 35px; background: #fff; border-radius: 10px; border: 1px solid #e8e6e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .container { 
+            max-width: 860px; 
+            margin: 40px auto; 
+            padding: 45px 35px; 
+            background: #fff; 
+            border-radius: 10px; 
+            border: 1px solid #e8e6e1; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        }
         .tag { color: #d35400; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; }
         h1 { font-size: 1.85rem; color: #2c3e50; margin: 8px 0 15px; word-break: keep-all; line-height: 1.4; }
         .meta { font-size: 0.85rem; color: #888; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .toc-box { background-color: #fdfcf9; border: 1px solid #e2ded7; border-left: 4px solid #d35400; padding: 20px 25px; border-radius: 6px; margin-bottom: 35px; }
+        
+        .toc-box {
+            background-color: #fdfcf9;
+            border: 1px solid #e2ded7;
+            border-left: 4px solid #d35400;
+            padding: 20px 25px;
+            border-radius: 6px;
+            margin-bottom: 35px;
+        }
         .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
         .toc-box ul { list-style: none; padding-left: 5px; }
         .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
         .toc-box a { color: #555; text-decoration: none; font-weight: 600; }
         .toc-box a:hover { color: #d35400; text-decoration: underline; }
+
         h2 { font-size: 1.35rem; color: #34495e; margin: 40px 0 15px; border-left: 4px solid #d35400; padding-left: 12px; }
+        h3 { font-size: 1.15rem; color: #2c3e50; margin: 25px 0 10px; }
         p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; color: #3f3f3f; }
-        ul { margin-bottom: 20px; padding-left: 22px; }
+        ul, ol { margin-bottom: 20px; padding-left: 22px; }
         li { margin-bottom: 8px; font-size: 1rem; color: #444; }
-        pre { background: #23272e; color: #abb2bf; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0 25px; font-size: 0.9rem; font-family: 'Consolas', monospace; line-height: 1.6; }
-        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #2980b9; padding: 18px 22px; border-radius: 6px; margin: 25px 0; }
+        pre { 
+            background: #23272e; 
+            color: #abb2bf; 
+            padding: 20px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            margin: 20px 0 25px; 
+            font-size: 0.9rem; 
+            font-family: 'Consolas', monospace; 
+            line-height: 1.6; 
+        }
+        .highlight-box { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            border-left: 4px solid #2980b9; 
+            padding: 18px 22px; 
+            border-radius: 6px; 
+            margin: 25px 0; 
+        }
         .back-link { display: inline-block; margin-top: 40px; color: #d35400; text-decoration: none; font-weight: bold; }
         footer { text-align: center; padding: 35px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
     </style>
@@ -48,7 +88,7 @@
     <div class="container">
         <span class="tag">AI & 업무자동화</span>
         <h1>C# .NET과 제미나이 API를 활용한 업무 자동화 파이프라인 구축기</h1>
-        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 8분</div>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 9분</div>
 
         <div class="toc-box">
             <h3>목차</h3>
@@ -57,58 +97,102 @@
                 <li><a href="#section2">2. 전체 자동화 파이프라인 아키텍처</a></li>
                 <li><a href="#section3">3. C#과 Gemini Multimodal API 연동 구현</a></li>
                 <li><a href="#section4">4. 실무 최적화: Rate Limit 제어와 로컬 캐싱</a></li>
-                <li><a href="#section5">5. SFTP 자동 업로드와 트러블슈팅</a></li>
+                <li><a href="#section5">5. SFTP 자동 업로드와 무인 배치 트러블슈팅</a></li>
             </ul>
         </div>
 
         <p>수백에서 수천 장에 달하는 고해상도 이미지 파일에 대해 제목, 키워드(태그), 카테고리 설명을 수동으로 작성하고 원격 서버로 전송하는 일은 단순 반복 작업 중에서도 피로도가 가장 높은 영역입니다. 본 글에서는 C# .NET 환경에서 구글 제미나이(Gemini) 멀티모달 API를 연동하여 이미지 분석부터 메타데이터 DB 캐싱, 그리고 SFTP 전송까지 하나의 파이프라인으로 연결한 실무 구축 사례를 다룹니다.</p>
 
         <h2 id="section1">1. 문제 정의: 수작업 메타데이터 입력의 한계</h2>
-        <p>스톡 사진 플랫폼이나 제조 공정 검사 데이터베이스에 이미지를 업로드할 때, 각 이미지의 컨텍스트를 파악해 15~30개의 관련 키워드를 도출하는 작업은 숙련자 기준으로도 장당 2~3분이 소요됩니다. 500장만 누적되어도 수십 시간의 리소스 손실이 발생합니다.</p>
+        <p>스톡 사진 플랫폼이나 제조 공정 검사 데이터베이스에 이미지를 업로드할 때, 각 이미지의 컨텍스트를 파악해 15~30개의 관련 영문/국문 키워드를 도출하는 작업은 숙련자 기준으로도 장당 2~3분이 소요됩니다. 500장만 누적되어도 수십 시간의 리소스 손실이 발생합니다.</p>
+        <p>이를 자동화하기 위해 초기에는 전통적인 컴퓨터 비전(CV) 태깅 라이브러리를 검토했으나, 사진의 구도, 정서적 분위기, 산업적 맥락까지 세밀하게 추출하는 데는 LLM 기반 멀티모달 모델의 성능이 압도적이었습니다.</p>
 
         <h2 id="section2">2. 전체 자동화 파이프라인 아키텍처</h2>
+        <p>전체 처리 시스템은 불필요한 API 비용을 0으로 억제하고 대용량 파일 전송 안정성을 확보하기 위해 아래와 같은 파이프라인 구조로 설계되었습니다.</p>
+
 <pre>
-[로컬 이미지 폴더]
-       │
-       ▼
+[로컬 이미지 폴더 스캔]
+          │
+          ▼
 [1. 파일 해시(SHA-256) 생성]
-       │
-       ├─► [로컬 DB 조회] ──(이미 존재)──► 기존 메타데이터 즉시 로드
-       │                                         │
-       ▼ (미분석 파일)                             │
-[2. Base64 인코딩 / 리사이징]                       │
-       │                                         │
-       ▼                                         │
-[3. Gemini Pro Vision API 비동기 쿼리]            │
-       │                                         │
-       ▼                                         │
-[4. 신규 메타데이터 로컬 DB 적재] ◄────────────────┘
-       │
-       ▼
+          │
+          ├─► [로컬 DB(MS-SQL/SQLite) 조회] ──(이미 존재)──► 기존 메타데이터 즉시 로드
+          │                                                         │
+          ▼ (미분석 파일인 경우)                                      │
+[2. 인메모리 이미지 리사이징 (Max 1024px)]                           │
+          │                                                         │
+          ▼                                                         │
+[3. Gemini 1.5 Flash Vision API 비동기 쿼리]                        │
+          │                                                         │
+          ▼ (응답 JSON 추출 및 한글/영문 정제)                       │
+[4. 신규 메타데이터 로컬 DB 적재 (캐시 등록)] ◄─────────────────────┘
+          │
+          ▼
 [5. Renci.SshNet 기반 SFTP 원격 서버 비동기 배치 전송]
 </pre>
 
         <h2 id="section3">3. C#과 Gemini Multimodal API 연동 구현</h2>
-        <p>메모리 상에서 최적 해상도로 리사이징한 후 Base64 문자열로 변환하여 요청 본문에 포함합니다.</p>
+        <p>C# .NET에서 제미나이 API를 호출할 때는 수십 MB에 달하는 원본 풀사이즈 이미지를 그대로 전송하지 않는 것이 핵심입니다. 네트워크 전송 지연과 페이로드 크기를 줄이기 위해 메모리 상에서 긴 축 기준 1024px로 리사이징한 후 Base64 문자열로 변환하여 요청 본문에 포함합니다.</p>
 
-<pre><code>public async Task&lt;string&gt; AnalyzeImageAsync(string imagePath, string apiKey)
+<pre><code>// HttpClient 기반 Gemini Multimodal API 비동기 요청 구현
+public async Task&lt;StockMetadata&gt; AnalyzeImageAsync(string imagePath, string apiKey)
 {
-    byte[] imageBytes = await File.ReadAllBytesAsync(imagePath);
-    string base64Image = Convert.ToBase64String(imageBytes);
+    // 1. 메모리 상에서 경량화 리사이징 및 Base64 변환
+    byte[] resizedBytes = ResizeImageToMemory(imagePath, 1024);
+    string base64Data = Convert.ToBase64String(resizedBytes);
+
     var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
-    var requestBody = new { /* Base64 페이로드 및 프롬프트 */ };
-    var response = await _httpClient.PostAsJsonAsync(endpoint, requestBody);
+
+    var prompt = "이 이미지를 분석하여 전문 스톡 플랫폼에 적합한 JSON 형식으로 답해줘.\n" +
+                 "스키마: { 'title': '간결한 영문제목', 'description': '설명', 'keywords': ['키워드1', '키워드2', ...] }\n" +
+                 "키워드는 검색 빈도가 높은 단어 25개를 엄선해줘.";
+
+    var payload = new
+    {
+        contents = new[]
+        {
+            new
+            {
+                parts = new object[]
+                {
+                    new { text = prompt },
+                    new
+                    {
+                        inline_data = new
+                        {
+                            mime_type = "image/jpeg",
+                            data = base64Data
+                        }
+                    }
+                }
+            }
+        },
+        generationConfig = new { response_mime_type = "application/json" }
+    };
+
+    var response = await _httpClient.PostAsJsonAsync(endpoint, payload);
     response.EnsureSuccessStatusCode();
-    return await response.Content.ReadAsStringAsync();
+
+    var jsonResult = await response.Content.ReadAsStringAsync();
+    return ParseGeminiResponse(jsonResult);
 }</code></pre>
 
         <h2 id="section4">4. 실무 최적화: Rate Limit 제어와 로컬 캐싱</h2>
         <div class="highlight-box">
-            <strong>핵심 트러블슈팅 포인트:</strong> HTTP 429 에러 방지를 위해 SemaphoreSlim 기반 동시성 제어와 로컬 DB 해시 캐싱 계층을 필수로 적용했습니다.
+            <strong>핵심 트러블슈팅 포인트:</strong> 수백 장의 대량 파일 분석 시 가장 빈번하게 마주치는 문제는 HTTP 429 (Too Many Requests) 에러와 토큰 비용 과다 지출입니다.
         </div>
+        <p>이를 방지하기 위해 두 가지 보호 계층을 구축했습니다:</p>
+        <ul>
+            <li><strong>지능형 로컬 DB 캐싱:</strong> 이미 분석이 완료된 이미지는 파일 해시(SHA-256)를 키 값으로 로컬 DB에 영구 저장합니다. 사용자가 동일한 이미지를 다시 선택하거나 폴더를 재스캔하더라도 Gemini API를 다시 호출하지 않고 로컬 DB에서 즉시 메타데이터를 불러옵니다.</li>
+            <li><strong>SemaphoreSlim 기반 동시성 제어:</strong> 동시 요청 수를 초당 3~5건으로 제한하여 API Provider의 Rate Limit 정책을 안정적으로 준수하도록 비동기 큐를 구성했습니다.</li>
+        </ul>
 
-        <h2 id="section5">5. SFTP 자동 업로드와 트러블슈팅</h2>
-        <p>전송 중 세션 끊김을 방지하기 위해 파일 단위 재시도 로직과 상태 플래그를 관리해야 안정적인 무인 배치가 가능합니다.</p>
+        <h2 id="section5">5. SFTP 자동 업로드와 무인 배치 트러블슈팅</h2>
+        <p>정제된 메타데이터와 원본 파일은 오픈소스 라이브러리인 <code>SSH.NET (Renci.SshNet)</code>을 통해 원격 스토리지로 자동 전송됩니다. 대용량 네트워크 전송 중 타임아웃이나 세션 끊김이 발생할 경우를 대비하여 다음 원칙을 적용했습니다:</p>
+        <ol>
+            <li><strong>폴더 일괄 전송 금지:</strong> 개별 파일 단위로 트랜잭션을 분리하여 전송 중단 시 실패한 파일부터 즉시 이어받기(Resume)가 가능하도록 구현합니다.</li>
+            <li><strong>임시 확장자(.tmp) 업로드 패턴:</strong> 전송 중에는 원격지에 <code>filename.jpg.tmp</code> 형태로 저장하고, 전송이 100% 완료된 순간 <code>filename.jpg</code>로 이름을 변경하여 수신 측 서버가 불완전한 파일을 읽어가는 레이스 컨디션을 원천 차단합니다.</li>
+        </ol>
 
         <a href="../index.html" class="back-link">← 메인 대문으로 돌아가기</a>
     </div>
