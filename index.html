@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- 검색 엔진 소유권 확인 메타태그 유지 -->
     <meta name="google-site-verification" content="RGGMpmXuVjEANhi8wNY1zfUlmZIzVG189exuANzw1iw" />
     <meta name="naver-site-verification" content="1501cd189e8a66e962b75035d3c4d50b0c9bea7a" />
     <meta charset="UTF-8">
@@ -10,93 +11,252 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            background-color: #faf9f7; /* 따뜻하고 밝은 배경톤 */
+            background-color: #faf9f7; /* 따뜻하고 밝은 서재 톤 */
             color: #333; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             min-height: 100vh;
+            line-height: 1.6;
         }
+
+        /* 상단 네비게이션 헤더 */
+        header {
+            width: 100%;
+            background-color: #fff;
+            border-bottom: 1px solid #e8e6e1;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo { 
+            font-size: 1.3rem; 
+            font-weight: 800; 
+            color: #2c3e50; 
+            text-decoration: none; 
+            letter-spacing: -0.5px;
+        }
+        nav { display: flex; gap: 18px; }
+        nav a { 
+            text-decoration: none; 
+            color: #555; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            transition: color 0.2s;
+        }
+        nav a:hover { color: #d35400; }
         
         /* 메인 컨테이너 */
         .main-container {
             width: 100%;
             max-width: 1000px;
-            padding: 40px 20px;
+            padding: 30px 20px 50px;
             text-align: center;
         }
 
-        /* 대표 이미지 영역 (코드로 하단 잘라내기) */
+        /* 대표 대문 이미지 (임시 자르기 코드 제거 및 온전한 비율 유지) */
         .hero-image {
             width: 100%;
-            max-height: 500px;
+            max-height: 520px;
             object-fit: cover;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            
-            /* 마법의 코드: 이미지 맨 아래에서부터 18% 영역을 투명하게 잘라버립니다 */
-            clip-path: inset(0 0 18% 0);
-            /* 잘려나간 밑부분의 빈 공간만큼 아래 버튼들을 위로 바짝 당겨옵니다 */
-            margin-bottom: -7%; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            margin-bottom: 35px;
+            display: block;
         }
 
-        /* 타이틀 및 소개 */
-        h1 { font-size: 2.2rem; color: #2c3e50; margin-bottom: 10px; font-weight: 800; }
-        p.desc { font-size: 1.1rem; color: #666; margin-bottom: 40px; line-height: 1.6; }
+        /* 소개 텍스트 */
+        p.desc { 
+            font-size: 1.15rem; 
+            color: #555; 
+            margin-bottom: 35px; 
+            line-height: 1.7; 
+            word-break: keep-all;
+        }
 
         /* 소통 버튼 그룹 (Flexbox) */
         .action-buttons {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
         }
 
         .btn {
             display: inline-block;
-            padding: 15px 35px;
-            font-size: 1.1rem;
+            padding: 14px 30px;
+            font-size: 1.05rem;
             font-weight: bold;
             color: #fff;
             text-decoration: none;
             border-radius: 8px;
-            transition: transform 0.2s, background-color 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
         }
-        .btn:hover { transform: translateY(-2px); }
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+        }
         
-        .btn-subscribe { background-color: #d35400; } /* 뉴스레터 구독 (스티비 폼 링크 연결) */
-        .btn-request { background-color: #27ae60; } /* 작업 의뢰 (구글 폼 링크 연결) */
-        .btn-guestbook { background-color: #2980b9; } /* 방명록/댓글 (깃허브 이슈/디스커스 연결) */
+        .btn-subscribe { background-color: #d35400; } /* 뉴스레터 구독 */
+        .btn-request { background-color: #27ae60; }   /* 작업 의뢰 */
+        .btn-guestbook { background-color: #2980b9; } /* 방명록/댓글 */
+
+        /* 기술 칼럼 글 목록 섹션 */
+        .content-section {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+            font-weight: 800;
+        }
+        .post-list { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 18px; 
+        }
+        .post-card {
+            background: #fff;
+            padding: 22px 25px;
+            border-radius: 10px;
+            border: 1px solid #e8e6e1;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .post-card:hover {
+            border-color: #d35400;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+        .post-tag {
+            display: inline-block;
+            background: #f4f1ea;
+            color: #7f8c8d;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .post-card h3 { 
+            font-size: 1.25rem; 
+            color: #2c3e50; 
+            margin-bottom: 8px; 
+            font-weight: 700;
+        }
+        .post-card p { 
+            font-size: 0.95rem; 
+            color: #666; 
+            margin-bottom: 12px; 
+            line-height: 1.6;
+        }
+        .post-date { 
+            font-size: 0.8rem; 
+            color: #999; 
+        }
 
         /* 하단 푸터 */
-        footer { margin-top: auto; padding: 20px; color: #999; font-size: 0.9rem; }
+        footer { 
+            width: 100%;
+            margin-top: auto; 
+            padding: 30px 20px; 
+            color: #777; 
+            font-size: 0.88rem; 
+            background-color: #f2eee9;
+            border-top: 1px solid #e2ded7;
+            text-align: center;
+        }
+        footer a { 
+            color: #555; 
+            text-decoration: none; 
+            font-weight: 600; 
+        }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
+    <!-- 상단 네비게이션 바 -->
+    <header>
+        <div class="nav-inner">
+            <a href="index.html" class="logo">moduin.kr</a>
+            <nav>
+                <a href="#tech-list">AI·업무자동화</a>
+                <a href="#tech-list">스마트팩토리</a>
+                <a href="#tech-list">자산관리·칼럼</a>
+                <a href="privacy.html">개인정보처리방침</a>
+            </nav>
+        </div>
+    </header>
+
     <div class="main-container">
-        <!-- 대문 이미지 (저장하신 파일 경로로 수정) -->
-        <img src="main_img.png" alt="moduin.kr 서재 이미지" class="hero-image">
+        <!-- 대문 이미지 -->
+        <img src="main_img.png" alt="moduin.kr 대표 이미지" class="hero-image">
         
-        
+        <!-- 소개 문구 -->
         <p class="desc">
             IT 업무 자동화, 스마트팩토리, 그리고 실용적인 개발 이야기.<br>
             당신의 시간을 아껴주는 기술을 공유합니다.
         </p>
 
-        <!-- 소통 액션 버튼 (href 안의 주소를 나중에 발급받은 링크로 교체하시면 됩니다) -->
+        <!-- 소통 액션 버튼 (연동 완료 주소 유지) -->
         <div class="action-buttons">
             <a href="https://page.stibee.com/subscriptions/528437" target="_blank" class="btn btn-subscribe">뉴스레터 구독하기</a>
             <a href="https://forms.gle/5Gk1uLgRWsm7SWMm9" target="_blank" class="btn btn-request">작업 의뢰 / 문의</a>
             <a href="https://github.com/mch9989/moduin.github.io/discussions" target="_blank" class="btn btn-guestbook">방명록 남기기</a>
         </div>
+
+        <!-- 기술 칼럼 포스팅 영역 -->
+        <div class="content-section" id="tech-list">
+            <h2 class="section-title">기술 및 개발 칼럼</h2>
+            <div class="post-list">
+                
+                <!-- 1번 포스트 (실제 연결) -->
+                <a href="post-01.html" class="post-card">
+                    <span class="post-tag">AI & 자동화</span>
+                    <h3>C# .NET과 제미나이 API를 활용한 업무 자동화 파이프라인 구축기</h3>
+                    <p>대용량 이미지 파일의 메타데이터 분석과 SFTP 자동 전송 파이프라인을 구축하며 겪은 아키텍처 설계와 성능 최적화 경험을 공유합니다.</p>
+                    <span class="post-date">2026. 11. 05 · 읽는 시간 5분</span>
+                </a>
+
+                <!-- 2번 포스트 (준비 중 카드) -->
+                <div class="post-card" style="cursor: default; opacity: 0.9;">
+                    <span class="post-tag">스마트팩토리</span>
+                    <h3>제조 현장 레거시 시스템과 MES 연동 시 반드시 체크할 데이터 아키텍처</h3>
+                    <p>수십 년간 축적된 공정 데이터와 레거시 인터페이스를 안전하게 연동하기 위한 트랜잭션 관리와 안정성 확보 방안.</p>
+                    <span class="post-date">2026. 11. 08 발행 예정</span>
+                </div>
+
+            </div>
+        </div>
     </div>
 
+    <!-- 푸터 (애드센스 필수 정책 링크 포함) -->
     <footer>
-        &copy; 2026 moduin.kr & PlatformWorks. All Rights Reserved.
+        <p>&copy; 2026 moduin.kr & PlatformWorks. All Rights Reserved.</p>
+        <p style="margin-top: 8px;">
+            <a href="privacy.html">개인정보처리방침 (Privacy Policy)</a> | 
+            <a href="https://github.com/mch9989/moduin.github.io/discussions" target="_blank">문의 및 기술 피드백</a>
+        </p>
     </footer>
 
 </body>
