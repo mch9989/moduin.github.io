@@ -6,72 +6,38 @@
     <title>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴 - moduin.kr</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.8; }
-        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; }
-        .nav-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            background: #faf9f7; 
+            color: #333; 
+            line-height: 1.85; 
+        }
+        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .nav-inner { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
-        .container { max-width: 800px; margin: 40px auto; padding: 40px 30px; background: #fff; border-radius: 8px; border: 1px solid #e8e6e1; }
-        h1 { font-size: 1.7rem; color: #2c3e50; margin-bottom: 15px; word-break: keep-all; }
-        .meta { font-size: 0.85rem; color: #888; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        h2 { font-size: 1.3rem; color: #34495e; margin: 35px 0 15px; border-left: 4px solid #2980b9; padding-left: 10px; }
-        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; }
-        ul { margin-bottom: 20px; padding-left: 20px; }
-        li { margin-bottom: 8px; font-size: 1rem; }
-        pre { background: #2d3436; color: #dfe6e9; padding: 15px; border-radius: 6px; overflow-x: auto; margin-bottom: 20px; font-size: 0.9rem; }
-        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #2980b9; padding: 15px 20px; border-radius: 4px; margin-bottom: 25px; }
-        .back-link { display: inline-block; margin-top: 35px; color: #d35400; text-decoration: none; font-weight: bold; }
-        footer { text-align: center; padding: 30px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
-    </style>
-    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    </script>
-</head>
-<body>
-
-    <header>
-        <div class="nav-inner">
-            <a href="../index.html" class="logo">moduin.kr</a>
-            <a href="../category-automation.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 목록으로 돌아가기</a>
-        </div>
-    </header>
-
-    <div class="container">
-        <span style="color:#2980b9; font-weight:bold; font-size:0.85rem;">C# & 성능 최적화</span>
-        <h1>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴</h1>
-        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin</div>
-
-        <p>가비지 컬렉터가 메모리를 자동 관리하는 .NET 환경에서도 비관리 리소스 해제 누락과 이벤트 구독 유지는 치명적인 OOM을 유발합니다.</p>
-
-        <div class="highlight-box">
-            <strong>핵심 요약:</strong> DB 커넥션, 네트워크 소켓 등 비관리 핸들은 표준 Dispose 패턴을 준수하고, 대용량 버퍼는 <code>ArrayPool&lt;T&gt;</code>을 통해 메모리를 재사용해야 합니다.
-        </div>
-
-        <h2>1. 표준 IDisposable 구현 골격</h2>
-<pre><code>public class HeavyResourceManager : IDisposable
-{
-    private bool _disposed = false;
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-    protected virtual void Dispose(bool disposing)
-    {
-        if (_disposed) return;
-        // 리소스 정리 로직
-        _disposed = true;
-    }
-}</code></pre>
-
-        <a href="../index.html" class="back-link">← 메인 대문으로 돌아가기</a>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
-    </footer>
-
-</body>
-</html>
+        .container { 
+            max-width: 860px; 
+            margin: 40px auto; 
+            padding: 45px 35px; 
+            background: #fff; 
+            border-radius: 10px; 
+            border: 1px solid #e8e6e1; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        }
+        .tag { color: #2980b9; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; }
+        h1 { font-size: 1.85rem; color: #2c3e50; margin: 8px 0 15px; word-break: keep-all; line-height: 1.4; }
+        .meta { font-size: 0.85rem; color: #888; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        
+        .toc-box {
+            background-color: #fdfcf9;
+            border: 1px solid #e2ded7;
+            border-left: 4px solid #2980b9;
+            padding: 20px 25px;
+            border-radius: 6px;
+            margin-bottom: 35px;
+        }
+        .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
+        .toc-box ul { list-style: none; padding-left: 5px; }
+        .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
+        .toc-box a { color: #555; text-decoration: none; font-weight: 600; }
+        .toc-box a:hover {
