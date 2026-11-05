@@ -40,4 +40,163 @@
         .toc-box ul { list-style: none; padding-left: 5px; }
         .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
         .toc-box a { color: #555; text-decoration: none; font-weight: 600; }
-        .toc-box a:hover {
+        .toc-box a:hover { color: #2980b9; text-decoration: underline; }
+
+        h2 { font-size: 1.35rem; color: #34495e; margin: 40px 0 15px; border-left: 4px solid #2980b9; padding-left: 12px; }
+        h3 { font-size: 1.15rem; color: #2c3e50; margin: 25px 0 10px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; color: #3f3f3f; }
+        ul, ol { margin-bottom: 20px; padding-left: 22px; }
+        li { margin-bottom: 8px; font-size: 1rem; color: #444; }
+        pre { 
+            background: #23272e; 
+            color: #abb2bf; 
+            padding: 20px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            margin: 20px 0 25px; 
+            font-size: 0.9rem; 
+            font-family: 'Consolas', monospace; 
+            line-height: 1.6; 
+        }
+        .highlight-box { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            border-left: 4px solid #2980b9; 
+            padding: 18px 22px; 
+            border-radius: 6px; 
+            margin: 25px 0; 
+        }
+        .back-link { display: inline-block; margin-top: 40px; color: #2980b9; text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 35px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
+    </style>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="../index.html" class="logo">moduin.kr</a>
+            <a href="../category-automation.html" style="text-decoration:none; color:#555; font-size:0.9rem; font-weight:600;">← 목록으로 돌아가기</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <span class="tag">C# & 성능 최적화</span>
+        <h1>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴</h1>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin · 읽는 시간: 약 8분</div>
+
+        <div class="toc-box">
+            <h3>목차</h3>
+            <ul>
+                <li><a href="#section1">1. 배경: 가비지 컬렉터(GC) 환경에서 메모리 누수가 일어나는 이유</a></li>
+                <li><a href="#section2">2. 안티패턴: 강한 이벤트 참조와 해제 누락</a></li>
+                <li><a href="#section3">3. 상속까지 고려한 정석 Dispose 패턴 구현</a></li>
+                <li><a href="#section4">4. LOH 단편화 방지를 위한 ArrayPool&lt;T&gt; 실무 적용</a></li>
+                <li><a href="#section5">5. 장시간 구동 서비스에서의 메모리 프로파일링 전략</a></li>
+            </ul>
+        </div>
+
+        <p>C# .NET의 가장 큰 장점 중 하나는 가비지 컬렉터(Garbage Collector)가 개발자 대신 메모리를 자동으로 수거해 준다는 점입니다. 하지만 24시간 365일 무중단으로 가동되어야 하는 제조 공정 관제 서비스, 대용량 파일 배치 프로그램, 고주파 시세 수집기에서는 여전히 <code>OutOfMemoryException (OOM)</code>이 빈번하게 발생합니다. 본 글에서는 비관리 리소스 누수와 대형 객체 힙(LOH) 단편화를 방어하는 아키텍처 원칙을 정리합니다.</p>
+
+        <h2 id="section1">1. 배경: 가비지 컬렉터(GC) 환경에서 메모리 누수가 일어나는 이유</h2>
+        <p>GC는 루트(Root) 객체로부터 참조 사슬이 끊어진 객체만을 수거합니다. 개발자가 더 이상 사용하지 않더라도 정적(Static) 컬렉션에 참조가 남아있거나, 장수명(Long-lived) 서비스 객체에 단수명(Short-lived) UI 컨트롤이 이벤트를 구독하고 있다면 GC는 해당 객체를 절대 해제하지 못합니다.</p>
+
+        <h2 id="section2">2. 안티패턴: 강한 이벤트 참조와 해제 누락</h2>
+        <p>가장 흔한 실수는 폼(Form)이나 컨트롤이 소멸될 때 이벤트 구독 해제(<code>-=</code>)를 생략하는 것입니다. 서비스 객체가 살아있는 한 닫힌 화면의 모든 메모리가 힙에 영구 고착됩니다.</p>
+
+<pre>
+[발행자 (Singleton Background Service)]
+          │ (강한 참조 유지: _eventHandler += Form_OnDataReceived)
+          ▼
+[구독자 (WinForms 창 / 데이터 뷰)] ──► 창을 닫아도 GC가 메모리를 수거하지 못함 (누수 발생!)
+
+[해결책: WeakEventManager 적용 또는 Dispose()에서 명시적 -= 해제 필수]
+</pre>
+
+        <h2 id="section3">3. 상속까지 고려한 정석 Dispose 패턴 구현</h2>
+        <p>파일 핸들, 네트워크 소켓, 비트맵 이미지, DB 커넥션 등의 비관리 리소스를 다룰 때는 Microsoft 공식 표준 가이드라인에 따른 Dispose 패턴을 철저히 준수해야 합니다.</p>
+
+<pre><code>public class HeavyBufferManager : IDisposable
+{
+    private bool _disposed = false;
+    private SafeHandle _safeHandle; // 비관리 리소스 핸들
+    private Stream _fileStream;      // 관리형 리소스
+
+    public HeavyBufferManager(string filePath)
+    {
+        _fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+    }
+
+    // 1. 외부에서 명시적으로 호출하는 Dispose
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this); // 이미 정리되었으므로 소멸자 호출 억제
+    }
+
+    // 2. 상속 클래스 확장을 고려한 protected 가상 메서드
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+
+        if (disposing)
+        {
+            // [관리 리소스 정리]: 다른 IDisposable 객체들의 Dispose 호출
+            _fileStream?.Dispose();
+            _fileStream = null;
+        }
+
+        // [비관리 리소스 정리]: Win32 핸들 등 직접 해제
+        _safeHandle?.Dispose();
+        _safeHandle = null;
+
+        _disposed = true;
+    }
+
+    // 3. 개발자가 Dispose를 깜빡했을 때를 대비한 최종 안전망 (소멸자)
+    ~HeavyBufferManager()
+    {
+        Dispose(false);
+    }
+}</code></pre>
+
+        <h2 id="section4">4. LOH 단편화 방지를 위한 ArrayPool&lt;T&gt; 실무 적용</h2>
+        <div class="highlight-box">
+            <strong>핵심 최적화:</strong> .NET에서 85,000바이트(약 83KB) 이상의 대형 객체는 대형 객체 힙(LOH)에 할당됩니다. LOH는 기본적으로 메모리 압축(Compaction)을 수행하지 않으므로, 대용량 버퍼를 수시로 <code>new byte[]</code>하면 힙에 구멍(단편화)이 숭숭 뚫려 물리 메모리가 충분해도 OOM이 터집니다.
+        </div>
+        <p>이를 방지하기 위해 <code>System.Buffers.ArrayPool&lt;byte&gt;.Shared</code>를 활용하여 메모리를 대여(Rent)하고 작업 후 반납(Return)하는 풀링 패턴을 적용해야 합니다.</p>
+
+<pre><code>// 대용량 패킷 처리 시 ArrayPool 적용 예시
+public async Task ProcessLargePacketAsync(Stream networkStream, int size)
+{
+    // LOH에 할당하지 않고 공유 메모리 풀에서 대여
+    byte[] buffer = ArrayPool&lt;byte&gt;.Shared.Rent(size);
+    try
+    {
+        int bytesRead = await networkStream.ReadAsync(buffer, 0, size);
+        // 패킷 파싱 및 비즈니스 로직 수행
+    }
+    finally
+    {
+        // 사용 후 반드시 풀로 반납 (클리어 옵션 선택 가능)
+        ArrayPool&lt;byte&gt;.Shared.Return(buffer);
+    }
+}</code></pre>
+
+        <h2 id="section5">5. 장시간 구동 서비스에서의 메모리 프로파일링 전략</h2>
+        <p>프로덕션 환경 배포 전에는 <code>dotnet-dump</code>나 <strong>Visual Studio 진단 도구</strong>를 활용하여 스냅샷을 2회 이상 채취해야 합니다. GC Generation 2 세대의 객체 크기가 우상향하고 있다면 참조가 물려있는 누수 지점을 역추적하여 제거해야만 현장에서 무중단으로 신뢰받는 백엔드 시스템을 완성할 수 있습니다.</p>
+
+        <a href="../category-automation.html" class="back-link">← AI·업무자동화 칼럼 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr & PlatformWorks. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
