@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴 - moduin.kr</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.8; }
+        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; }
+        .nav-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        .container { max-width: 800px; margin: 40px auto; padding: 40px 30px; background: #fff; border-radius: 8px; border: 1px solid #e8e6e1; }
+        h1 { font-size: 1.7rem; color: #2c3e50; margin-bottom: 15px; word-break: keep-all; }
+        .meta { font-size: 0.85rem; color: #888; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        h2 { font-size: 1.3rem; color: #34495e; margin: 35px 0 15px; border-left: 4px solid #2980b9; padding-left: 10px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; }
+        ul { margin-bottom: 20px; padding-left: 20px; }
+        li { margin-bottom: 8px; font-size: 1rem; }
+        pre { background: #2d3436; color: #dfe6e9; padding: 15px; border-radius: 6px; overflow-x: auto; margin-bottom: 20px; font-size: 0.9rem; }
+        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #2980b9; padding: 15px 20px; border-radius: 4px; margin-bottom: 25px; }
+        .back-link { display: inline-block; margin-top: 35px; color: #d35400; text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 30px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="index.html" class="logo">moduin.kr</a>
+            <a href="index.html" style="text-decoration:none; color:#555; font-size:0.9rem;">← 메인으로 돌아가기</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <span style="color:#2980b9; font-weight:bold; font-size:0.85rem;">C# & 성능 최적화</span>
+        <h1>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴</h1>
+        <div class="meta">작성일: 2026년 11월 5일 · 작성자: moduin</div>
+
+        <p>가비지 컬렉터(Garbage Collector)가 메모리를 자동 관리해 주는 .NET 환경에서도 장시간 구동되는 제조 현장 모니터링 시스템이나 대용량 배치 프로세스에서는 OutOfMemoryException(OOM)이 발생하기 쉽습니다. 비관리 리소스 해제 누락과 잘못된 이벤트 구독 구조가 주요 원인입니다.</p>
+
+        <div class="highlight-box">
+            <strong>핵심 요약:</strong> DB 커넥션, 네트워크 소켓, 비트맵 이미지 등 비관리 핸들을 다룰 때는 표준 Dispose 패턴을 엄격히 준수해야 하며, 대용량 버퍼는 LOH(Large Object Heap) 단편화를 방지하기 위해 <code>ArrayPool&lt;T&gt;</code>을 적극 활용해야 합니다.
+        </div>
+
+        <h2>1. 메모리 누수의 주범: 이벤트 핸들러 참조 유지</h2>
+        <p>게시자(Publisher)와 구독자(Subscriber) 객체 간의 강한 참조 관계 때문에 구독자가 더 이상 필요하지 않아도 GC 대상에서 제외되는 현상이 빈번합니다. 수명이 긴 서비스 객체에 윈도우 폼이나 컨트롤의 이벤트를 등록할 때는 반드시 이벤트 구독 해제(<code>-=</code>)를 명시하거나 WeakEventManager 패턴을 적용해야 합니다.</p>
+
+        <h2>2. 정석 표준 IDisposable 패턴 구현</h2>
+        <p>파생 클래스 확장성과 소멸자(Finalizer) 호출을 모두 고려한 표준 패턴 구조 예시입니다.</p>
+
+        <pre><code>public class HeavyResourceManager : IDisposable
+{
+    private bool _disposed = false;
+    private SafeHandle _safeHandle; // 비관리 리소스 핸들
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this); // 이미 정리되었으므로 GC 소멸자 호출 억제
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+
+        if (disposing)
+        {
+            // 관리 리소스 정리 (예: 다른 IDisposable 구현 객체)
+        }
+
+        // 비관리 리소스 직접 해제
+        _safeHandle?.Dispose();
+        _disposed = true;
+    }
+
+    ~HeavyResourceManager()
+    {
+        Dispose(false);
+    }
+}</code></pre>
+
+        <h2>3. LOH 단편화와 ArrayPool 활용</h2>
+        <p>85,000바이트 이상의 대형 객체는 LOH 영역에 직접 할당되어 컴팩션(Compaction) 비용이 크게 발생합니다. 대량의 파일 I/O나 패킷 버퍼링이 반복되는 구간에서는 <code>ArrayPool&lt;byte&gt;.Shared.Rent()</code>를 통해 메모리를 재사용하고 작업 후 <code>Return()</code> 처리하는 구조가 메모리 안정성을 보장합니다.</p>
+
+        <a href="index.html" class="back-link">← 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
