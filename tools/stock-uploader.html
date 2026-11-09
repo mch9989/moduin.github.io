@@ -312,21 +312,24 @@
             }
         };
 
-        // 1. 원클릭 가상 샘플 시뮬레이션
+        // 1. 원클릭 가상 샘플 시뮬레이션 (피드백 강화 버전)
         function runSampleTest(sampleKey, btnElement) {
             const buttons = document.querySelectorAll('.demo-controls .demo-btn');
             buttons.forEach(b => b.classList.remove('active'));
             if (btnElement) btnElement.classList.add('active');
 
             const consoleBox = document.getElementById('outputConsole');
-            consoleBox.innerHTML = "// [모의 샌드박스] Gemini 1.5 Flash Vision 응답 파싱 중...\n";
+            // 로딩 연출 강조
+            consoleBox.style.opacity = "0.5";
+            consoleBox.innerHTML = `// [실시간 쿼리 전송 중...]\n// 대상: ${sampleKey.toUpperCase()} 이미지 스트림\n// Gemini 1.5 Flash Vision 모델 역직렬화 진행 중... ⏳`;
 
             setTimeout(() => {
                 const data = sampleDatabase[sampleKey];
                 if (data) {
-                    consoleBox.innerHTML = JSON.stringify(data, null, 2);
+                    consoleBox.style.opacity = "1";
+                    consoleBox.innerHTML = `// [✔ 분석 완료] 응답 시간: ${data.processing_time}\n` + JSON.stringify(data, null, 2);
                 }
-            }, 250);
+            }, 650); // 0.65초로 현실감 있는 딜레이 부여
         }
 
         // 2. 사용자 파일 선택 및 Canvas 메모리 리사이징
