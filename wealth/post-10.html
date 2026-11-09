@@ -19,7 +19,239 @@
             border-bottom: 1px solid #e0ded9; 
             padding: 15px 20px; 
             position: sticky; 
+            top: 0; <!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[국장 마감] 코스피·코스닥 수급 공방과 반도체·2차전지 주도권 점검 - moduin.kr</title>
+    <meta name="description" content="외인·기관 수급 동향과 반도체, 이차전지 섹터별 매물 출회 분석 및 환율 변동에 따른 차주 국내 증시 대응 전략 요약.">
+    <link rel="canonical" href="https://moduin.kr/wealth/post-10.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
+            background: #faf9f7; 
+            color: #333; 
+            line-height: 1.85; 
+        }
+        header { 
+            background: #fff; 
+            border-bottom: 1px solid #e0ded9; 
+            padding: 15px 20px; 
+            position: sticky; 
             top: 0; 
+            z-index: 100; 
+        }
+        .nav-inner { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+        }
+        .logo { font-size: 1.25rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        nav { display: flex; gap: 16px; flex-wrap: wrap; }
+        nav a { text-decoration: none; color: #555; font-weight: 600; font-size: 0.95rem; }
+        nav a:hover, nav a.active { color: #d35400; font-weight: 800; }
+
+        .container { 
+            max-width: 900px; 
+            margin: 40px auto; 
+            padding: 45px 35px; 
+            background: #fff; 
+            border-radius: 10px; 
+            border: 1px solid #e8e6e1; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+        }
+        .tag-badge { 
+            background: #fdf2e9; 
+            color: #d35400; 
+            padding: 5px 12px; 
+            border-radius: 20px; 
+            font-size: 0.82rem; 
+            font-weight: 800; 
+            display: inline-block; 
+            margin-bottom: 14px; 
+        }
+        h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 14px; line-height: 1.35; word-break: keep-all; }
+        .post-meta { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+
+        .toc-box {
+            background: #fdfdfd;
+            border: 1px solid #e2e0db;
+            border-left: 4px solid #d35400;
+            padding: 20px 24px;
+            border-radius: 6px;
+            margin-bottom: 35px;
+        }
+        .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
+        .toc-box ul { list-style: none; padding-left: 5px; margin-bottom: 0; }
+        .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
+        .toc-box a { color: #555; text-decoration: none; }
+        .toc-box a:hover { color: #d35400; text-decoration: underline; }
+
+        h2 { 
+            font-size: 1.45rem; 
+            color: #2c3e50; 
+            margin: 45px 0 18px; 
+            border-left: 4px solid #d35400; 
+            padding-left: 14px; 
+            word-break: keep-all; 
+        }
+        h3 { font-size: 1.15rem; color: #34495e; margin: 25px 0 12px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; color: #444; word-break: keep-all; }
+        ul, ol { margin-bottom: 25px; padding-left: 22px; }
+        li { margin-bottom: 10px; font-size: 0.98rem; color: #444; }
+
+        .market-card {
+            background: #faf8f5;
+            border: 1px solid #ede8e1;
+            border-radius: 6px;
+            padding: 18px 22px;
+            margin-bottom: 15px;
+        }
+        .market-card strong { color: #d35400; font-size: 1.05rem; }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 25px 0 35px; 
+            font-size: 0.95rem; 
+        }
+        th, td { 
+            border: 1px solid #e0ded9; 
+            padding: 12px 14px; 
+            text-align: left; 
+        }
+        th { background: #fbf9f6; color: #2c3e50; font-weight: 700; width: 28%; }
+        td { background: #fff; color: #555; }
+
+        .back-link { 
+            display: inline-block; 
+            margin-top: 40px; 
+            color: #d35400; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border: 1px solid #d35400; 
+            padding: 8px 18px; 
+            border-radius: 6px; 
+            transition: 0.2s; 
+        }
+        .back-link:hover { background: #d35400; color: #fff; }
+        footer { 
+            text-align: center; 
+            padding: 35px 20px; 
+            font-size: 0.85rem; 
+            color: #888; 
+            margin-top: 50px; 
+            border-top: 1px solid #e8e6e1; 
+        }
+    </style>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="../index.html" class="logo">moduin.kr</a>
+            <nav>
+                <a href="../about.html">소개</a>
+                <a href="../category-automation.html">AI·업무자동화</a>
+                <a href="../category-smartfactory.html">스마트팩토리</a>
+                <a href="../category-wealth.html" class="active">자산관리·투자</a>
+                <a href="../tools/stock-uploader.html">배포 도구</a>
+                <a href="../privacy.html">개인정보처리방침</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <span class="tag-badge">자산관리·투자 · 국내증시 마감 브리핑</span>
+        <h1>[국장 마감] 코스피·코스닥 수급 공방과 반도체·2차전지 주도권 점검</h1>
+        <div class="post-meta">게시일: 2026-11-09 · 카테고리: 자산관리·투자 · 시장 분석: 수급 분석, 지수 흐름, 리스크 관리</div>
+
+        <div class="toc-box">
+            <h3>목차</h3>
+            <ul>
+                <li><a href="#section-1">1. 당일 주요 지수 및 수급 주체별 매매 동향</a></li>
+                <li><a href="#section-2">2. 주요 섹터별 주도권 점검: 반도체 vs 2차전지</a></li>
+                <li><a href="#section-3">3. 거시 지표 영향: 원/달러 환율과 외인 매수 강도</a></li>
+                <li><a href="#section-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</a></li>
+            </ul>
+        </div>
+
+        <p>금일 국내 주식시장은 미국발 매크로 금리 변수와 환율 흐름 속에서 외국인과 기관의 뚜렷한 매매 편향을 보이며 팽팽한 수급 공방전을 이어갔습니다. 지수의 단순 등락률보다 중요한 것은 <strong>메이저 주포(외인·기관)가 어느 섹터에서 차익 실현을 하고 어느 바닥에서 물량을 담았는가</strong>입니다.</p>
+
+        <p>시장 참여자들의 감정이나 희망회로를 배제하고, 금일 장 마감 기준 주요 수급 데이터와 지수 지지 라인, 그리고 차주 대응 전략을 객관적인 관점에서 정리합니다.</p>
+
+        <h2 id="section-1">1. 당일 주요 지수 및 수급 주체별 매매 동향</h2>
+        <p>코스피는 대형주 중심의 외국인 프로그램 순매도 압력이 이어지며 지수 상단이 제한되었고, 코스닥은 개별 종목 장세의 변동성이 극대화되었습니다.</p>
+        <ul>
+            <li><strong>외국인 수급:</strong> 선물 시장에서 방향성을 제한하며 현물 대형 반도체 중심으로 보수적인 포지션을 유지.</li>
+            <li><strong>기관 수급:</strong> 금융투자의 금융투자 차익거래 매물이 출회된 반면, 연기금은 저가 지지선 부근에서 방어성 분할 매수 집행.</li>
+            <li><strong>개인 수급:</strong> 낙폭 과대 섹터 중심의 순매수가 이어졌으나 지수 반등의 주도 동력으로는 부족한 흐름.</li>
+        </ul>
+
+        <h2 id="section-2">2. 주요 섹터별 주도권 점검: 반도체 vs 2차전지</h2>
+        <p>지수 영향력이 가장 큰 두 주력 섹터의 엇갈린 주도권과 자금 흐름 점검입니다.</p>
+
+        <div class="market-card">
+            <p><strong>반도체 섹터 (AI 인프라 및 메모리):</strong><br>
+            글로벌 빅테크 투자 사이클 이슈로 장 초반 흔들림이 있었으나, 고대역폭메모리(HBM) 및 장비 밸류체인은 견고한 하방 지지력을 보였습니다. 단기 과열 해소 국면으로 진입하며 호실적 기반 종목 중심의 옥석 가리기가 진행 중입니다.</p>
+        </div>
+
+        <div class="market-card">
+            <p><strong>2차전지 섹터 (소재 및 셀):</strong><br>
+            전방 전기차(EV) 수요 회복 속도에 대한 경계감과 원자재 가격 변동성으로 인해 반등 시마다 매물 출회 압박을 받았습니다. 펀더멘털의 본격 턴어라운드 전까지는 추세 매수보다는 박스권 트레이딩 관점 접근이 유효합니다.</p>
+        </div>
+
+        <h2 id="section-3">3. 거시 지표 영향: 원/달러 환율과 외인 매수 강도</h2>
+        <p>국장 수급의 열쇠를 쥐고 있는 원/달러 환율의 밴드 상단 경계감과 외인 현물 매수 유입 여부입니다.</p>
+
+        <table>
+            <tr>
+                <th>거시/수급 지표</th>
+                <th>시장 영향 및 평가</th>
+            </tr>
+            <tr>
+                <td>원/달러 환율 레벨</td>
+                <td>환율이 상단 저항선 부근에서 고착화되며 환차손을 우려한 패시브 펀드의 대규모 현물 매수 유입을 제약</td>
+            </tr>
+            <tr>
+                <td>외인 선물 포지션</td>
+                <td>단기 롤오버 및 지수 헷지성 숏 포지션이 혼재되어 지수의 급등락을 유발하는 트리거로 작용</td>
+            </tr>
+            <tr>
+                <td>거래대금 추이</td>
+                <td>양 시장 합산 거래대금이 박스권 하단에 머물며 주도주 외 개별 테마주 순환매 장세 연출</td>
+            </tr>
+        </table>
+
+        <h2 id="section-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</h2>
+        <p>지수가 뚜렷한 추세를 형성하기 전까지 무리한 비중 확대나 막연한 낙폭 과대 매수는 손실폭을 키우기 쉽습니다. 다음 세 가지 원칙을 중심으로 대응 포트폴리오를 유지해야 합니다.</p>
+        <ul>
+            <li><strong>현금 비중 30% 이상 유지:</strong> 지수 급변동에 따른 저가 매수 기회를 위해 무리한 풀베팅 자제.</li>
+            <li><strong>실적 확인 없는 테마주 추격 매수 금지:</strong> 수급 연속성이 없는 단기 찌라시/테마 종목은 당일 청산 원칙 준수.</li>
+            <li><strong>주요 지지선 이탈 시 기계적 손절(Loss-Cut):</strong> 기술적 저지선 하향 이탈 시 감정을 배제하고 비중 축소 후 현금 확보.</li>
+        </ul>
+
+        <a href="../category-wealth.html" class="back-link">← 자산관리·투자 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
             z-index: 100; 
         }
         .nav-inner { 
