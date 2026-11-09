@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C# 무인 배치 자동화의 핵심: Polly 기반 지수 백오프와 서킷 브레이커 - moduin.kr</title>
+    <link rel="canonical" href="https://moduin.kr/automation/post-07.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.85; }
+        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .nav-inner { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        .container { max-width: 860px; margin: 40px auto; padding: 45px 35px; background: #fff; border-radius: 10px; border: 1px solid #e8e6e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .tag { color: #d35400; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; }
+        h1 { font-size: 1.85rem; color: #2c3e50; margin: 8px 0 15px; word-break: keep-all; line-height: 1.4; }
+        .meta { font-size: 0.85rem; color: #888; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .toc-box { background-color: #fdfcf9; border: 1px solid #e2ded7; border-left: 4px solid #d35400; padding: 20px 25px; border-radius: 6px; margin-bottom: 35px; }
+        .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
+        .toc-box ul { list-style: none; padding-left: 5px; }
+        .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
+        .toc-box a { color: #555; text-decoration: none; font-weight: 600; }
+        .toc-box a:hover { color: #d35400; text-decoration: underline; }
+        h2 { font-size: 1.35rem; color: #34495e; margin: 40px 0 15px; border-left: 4px solid #d35400; padding-left: 12px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; color: #3f3f3f; }
+        ul, ol { margin-bottom: 20px; padding-left: 22px; }
+        li { margin-bottom: 8px; font-size: 1rem; color: #444; }
+        pre { background: #23272e; color: #abb2bf; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0 25px; font-size: 0.9rem; font-family: 'Consolas', monospace; line-height: 1.6; }
+        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #2980b9; padding: 18px 22px; border-radius: 6px; margin: 25px 0; }
+        .back-link { display: inline-block; margin-top: 40px; color: #d35400; text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 35px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
+    </style>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="../index.html" class="logo">moduin.kr</a>
+            <a href="../category-automation.html" style="text-decoration:none; color:#555; font-size:0.9rem; font-weight:600;">← AI·자동화 칼럼 목록</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <span class="tag">AI & 업무자동화</span>
+        <h1>C# 무인 배치 자동화의 핵심: Polly 기반 지수 백오프와 서킷 브레이커</h1>
+        <div class="meta">작성일: 2026년 11월 9일 · 작성자: moduin · 읽는 시간: 약 8분</div>
+
+        <div class="toc-box">
+            <h3>목차</h3>
+            <ul>
+                <li><a href="#sec1">1. 배경: 무인 데스크톱 배치가 심야에 멈추는 이유</a></li>
+                <li><a href="#sec2">2. 단순 반복 재시도의 한계와 지수 백오프(Exponential Backoff)</a></li>
+                <li><a href="#sec3">3. Polly 라이브러리를 활용한 서킷 브레이커(Circuit Breaker) 구현</a></li>
+                <li><a href="#sec4">4. SFTP 대용량 파일 전송 파이프라인 실무 적용</a></li>
+                <li><a href="#sec5">5. 시스템 자원 고갈 방지와 배치 안정성 검증</a></li>
+            </ul>
+        </div>
+
+        <p>인공지능 API를 연동한 메타데이터 생성이나 수천 건의 파일 전송 배치를 심야에 무인으로 가동할 때, 개발자를 가장 괴롭히는 것은 간헐적인 네트워크 순단이나 원격 API 서버의 일시적 503(Service Unavailable) 응답입니다. 적절한 복원력(Resilience) 정책 없이 단순 루프로 재시도하면 스레드가 블로킹되거나 API Rate Limit에 걸려 전체 배치가 중단됩니다. 본 글에서는 C# 환경에서 Polly를 이용해 견고한 장애 극복 파이프라인을 구축하는 기법을 다룹니다.</p>
+
+        <h2 id="sec1">1. 배경: 무인 데스크톱 배치가 심야에 멈추는 이유</h2>
+        <p>네트워크 I/O는 본질적으로 불안정합니다. 외부 LLM API 서버의 순간적인 부하 스파이크나 내부망 스위칭 허브의 패킷 드롭은 1~2초 후 자연 복구되는 경우가 많습니다. 그러나 클라이언트 프로그램이 즉각적인 예외(Exception) 처리로 프로세스를 종료시키면 새벽 시간대 전체 파이프라인이 정지하는 문제가 발생합니다.</p>
+
+        <h2 id="sec2">2. 단순 반복 재시도의 한계와 지수 백오프(Exponential Backoff)</h2>
+        <p>장애가 발생했을 때 1초 간격으로 동일하게 10번 재시도하는 고정 간격 방식은 장애를 겪는 서버에 트래픽 폭풍(Thundering Herd)을 가중시킵니다. <strong>지수 백오프</strong>는 실패 횟수가 늘어날 때마다 대기 시간을 지수함수적으로 증가(예: 2초, 4초, 8초, 16초...)시키고, 여기에 난수(Jitter)를 섞어 동시 요청 충돌을 분산시키는 정석 기법입니다.</p>
+
+<pre>
+[요청 실패 발생 (HTTP 429 / 503)]
+         │
+         ├─► 재시도 1회: 2초 + Jitter 대기
+         ├─► 재시도 2회: 4초 + Jitter 대기
+         ├─► 재시도 3회: 8초 + Jitter 대기 ──► 성공 시 정상 파이프라인 복귀
+         │
+         ▼ (지속 실패 시)
+[서킷 브레이커 OPEN (추가 호출 차단, 시스템 보호)]
+</pre>
+
+        <h2 id="sec3">3. Polly 라이브러리를 활용한 서킷 브레이커(Circuit Breaker) 구현</h2>
+        <p>서킷 브레이커는 원격 서비스가 완전히 다운되었을 때 무의미한 재시도를 반복하지 않고 회로를 즉시 차단(Open)하여 로컬 자원 낭비를 막고, 일정 시간 후 상태를 시험(Half-Open)하는 디자인 패턴입니다.</p>
+
+<pre><code>// Polly를 활용한 비동기 재시도 및 서킷 브레이커 결합 정책
+var retryPolicy = Policy
+    .Handle&lt;HttpRequestException&gt;()
+    .OrResult&lt;HttpResponseMessage&gt;(r =&gt; (int)r.StatusCode == 429 || (int)r.StatusCode &gt;= 500)
+    .WaitAndRetryAsync(
+        retryCount: 4,
+        sleepDurationProvider: retryAttempt =&gt; 
+            TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)) + TimeSpan.FromMilliseconds(new Random().Next(0, 500)),
+        onRetry: (outcome, timespan, retryCount, context) =&gt;
+        {
+            Logger.Warn($"요청 재시도 #{retryCount} 대기: {timespan.TotalSeconds:F1}초. 사유: {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}");
+        });
+
+var circuitBreakerPolicy = Policy
+    .Handle&lt;Exception&gt;()
+    .CircuitBreakerAsync(
+        exceptionsAllowedBeforeBreaking: 5,
+        durationOfBreak: TimeSpan.FromMinutes(1),
+        onBreak: (ex, breakDelay) =&gt; Logger.Error($"서킷 브레이커 OPEN: 원격지 장애 감지, {breakDelay.TotalSeconds}초간 차단"),
+        onReset: () =&gt; Logger.Info("서킷 브레이커 RESET: 정상 상태 복구"),
+        onHalfOpen: () =&gt; Logger.Info("서킷 브레이커 HALF-OPEN: 시험 요청 전송 중"));
+
+var resilientPolicy = Policy.WrapAsync(retryPolicy, circuitBreakerPolicy);</code></pre>
+
+        <h2 id="sec4">4. SFTP 대용량 파일 전송 파이프라인 실무 적용</h2>
+        <p>SSH.NET 기반 SFTP 전송 시 소켓 타임아웃이 발생하면 세션을 안전하게 재생성(Reconnection)한 뒤 미완료된 파일 포인터부터 이어서 전송할 수 있도록 정책 파이프라인 내부에 주입해야 메모리 누수 없이 안정적인 루프를 유지할 수 있습니다.</p>
+
+        <h2 id="sec5">5. 시스템 자원 고갈 방지와 배치 안정성 검증</h2>
+        <div class="highlight-box">
+            <strong>현장 검증 원칙:</strong> 재시도 로직을 설계할 때 최대 재시도 시간(Timeout) 상한선을 설정하지 않으면 무한 대기 스레드가 생성되어 데스크톱 메모리를 점유합니다. 반드시 <code>CancellationTokenSource</code>와 결합하여 특정 배치 건당 타임아웃을 강제해야 합니다.
+        </div>
+
+        <a href="../category-automation.html" class="back-link">← AI·업무자동화 칼럼 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr & PlatformWorks. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
