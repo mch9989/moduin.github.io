@@ -3,188 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[스마트팩토리] 중소 제조현장 레거시 PLC 연동을 위한 경량 엣지 데이터 브로커 설계 - moduin.kr</title>
-    <meta name="description" content="중소 제조현장 PLC와 상위 MES/DB 간 통신 단절 및 데이터 유실을 방지하는 무손실 엣지 브로커 아키텍처와 상용 패키징 전략.">
-    <link rel="canonical" href="https://moduin.kr/smartfactory/post-10.html" />
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            background: #faf9f7; 
-            color: #333; 
-            line-height: 1.85; 
-        }
-        header { 
-            background: #fff; 
-            border-bottom: 1px solid #e0ded9; 
-            padding: 15px 20px; 
-            position: sticky; 
-            top: 0; <!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>[국장 마감] 코스피·코스닥 수급 공방과 반도체·2차전지 주도권 점검 - moduin.kr</title>
     <meta name="description" content="외인·기관 수급 동향과 반도체, 이차전지 섹터별 매물 출회 분석 및 환율 변동에 따른 차주 국내 증시 대응 전략 요약.">
     <link rel="canonical" href="https://moduin.kr/wealth/post-10.html" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; 
-            background: #faf9f7; 
-            color: #333; 
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; 
+            background-color: #f8f9fa; 
+            color: #212529; 
             line-height: 1.85; 
         }
+        
+        /* 상단 네비게이션: post-09와 동일한 단일 복귀 링크 레이아웃 */
         header { 
-            background: #fff; 
-            border-bottom: 1px solid #e0ded9; 
-            padding: 15px 20px; 
-            position: sticky; 
-            top: 0; 
-            z-index: 100; 
+            width: 100%; 
+            background: #ffffff; 
+            border-bottom: 1px solid #e9ecef; 
+            padding: 16px 24px; 
+            margin-bottom: 40px;
         }
-        .nav-inner { 
-            max-width: 900px; 
+        .header-inner { 
+            max-width: 880px; 
             margin: 0 auto; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            flex-wrap: wrap; 
-            gap: 15px; 
         }
-        .logo { font-size: 1.25rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
-        nav { display: flex; gap: 16px; flex-wrap: wrap; }
-        nav a { text-decoration: none; color: #555; font-weight: 600; font-size: 0.95rem; }
-        nav a:hover, nav a.active { color: #d35400; font-weight: 800; }
-
-        .container { 
-            max-width: 900px; 
-            margin: 40px auto; 
-            padding: 45px 35px; 
-            background: #fff; 
-            border-radius: 10px; 
-            border: 1px solid #e8e6e1; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-        }
-        .tag-badge { 
-            background: #fdf2e9; 
-            color: #d35400; 
-            padding: 5px 12px; 
-            border-radius: 20px; 
-            font-size: 0.82rem; 
+        .header-logo { 
+            font-size: 1.25rem; 
             font-weight: 800; 
-            display: inline-block; 
+            color: #212529; 
+            text-decoration: none; 
+            letter-spacing: -0.5px;
+        }
+        .header-back { 
+            font-size: 0.92rem; 
+            color: #495057; 
+            text-decoration: none; 
+            font-weight: 500;
+        }
+        .header-back:hover { 
+            color: #6f42c1; 
+            text-decoration: underline; 
+        }
+
+        /* 중앙 포스트 카드 래퍼 */
+        .article-card { 
+            max-width: 880px; 
+            margin: 0 auto 60px auto; 
+            background: #ffffff; 
+            border: 1px solid #e9ecef; 
+            border-radius: 8px; 
+            padding: 48px 44px; 
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .category-label { 
+            font-size: 0.9rem; 
+            font-weight: 700; 
+            color: #6f42c1; 
             margin-bottom: 14px; 
+            display: inline-block;
         }
-        h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 14px; line-height: 1.35; word-break: keep-all; }
-        .post-meta { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-
-        .toc-box {
-            background: #fdfdfd;
-            border: 1px solid #e2e0db;
-            border-left: 4px solid #d35400;
-            padding: 20px 24px;
-            border-radius: 6px;
-            margin-bottom: 35px;
-        }
-        .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
-        .toc-box ul { list-style: none; padding-left: 5px; margin-bottom: 0; }
-        .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
-        .toc-box a { color: #555; text-decoration: none; }
-        .toc-box a:hover { color: #d35400; text-decoration: underline; }
-
-        h2 { 
-            font-size: 1.45rem; 
-            color: #2c3e50; 
-            margin: 45px 0 18px; 
-            border-left: 4px solid #d35400; 
-            padding-left: 14px; 
+        h1 { 
+            font-size: 2.1rem; 
+            font-weight: 800; 
+            color: #212529; 
+            line-height: 1.35; 
+            margin-bottom: 14px; 
+            letter-spacing: -0.8px;
             word-break: keep-all; 
         }
-        h3 { font-size: 1.15rem; color: #34495e; margin: 25px 0 12px; }
-        p { margin-bottom: 18px; font-size: 1.02rem; color: #444; word-break: keep-all; }
-        ul, ol { margin-bottom: 25px; padding-left: 22px; }
-        li { margin-bottom: 10px; font-size: 0.98rem; color: #444; }
+        .post-meta { 
+            font-size: 0.88rem; 
+            color: #6c757d; 
+            margin-bottom: 32px; 
+        }
 
-        .market-card {
-            background: #faf8f5;
-            border: 1px solid #ede8e1;
+        /* 법적 고지 (Disclaimer) 박스 */
+        .disclaimer-box { 
+            background-color: #fff; 
+            border: 1px solid #f5c6cb; 
+            border-radius: 6px; 
+            padding: 20px 24px; 
+            margin-bottom: 36px; 
+            color: #721c24; 
+            font-size: 0.93rem; 
+            line-height: 1.7; 
+        }
+        .disclaimer-title { 
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .disclaimer-box p { margin-bottom: 6px; }
+        .disclaimer-box p:last-child { margin-bottom: 0; }
+
+        /* 목차 박스 */
+        .toc-card { 
+            background: #ffffff; 
+            border: 1px solid #e9ecef; 
+            border-left: 4px solid #6f42c1; 
+            border-radius: 4px; 
+            padding: 24px 28px; 
+            margin-bottom: 40px; 
+        }
+        .toc-title { 
+            font-size: 1.05rem; 
+            font-weight: 700; 
+            color: #212529; 
+            margin-bottom: 12px; 
+        }
+        .toc-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .toc-list li { margin-bottom: 8px; font-size: 0.95rem; }
+        .toc-list li:last-child { margin-bottom: 0; }
+        .toc-list a { color: #495057; text-decoration: none; }
+        .toc-list a:hover { color: #6f42c1; text-decoration: underline; }
+
+        /* 본문 섹션 제목 */
+        h2 { 
+            font-size: 1.45rem; 
+            font-weight: 700; 
+            color: #212529; 
+            margin: 44px 0 20px 0; 
+            display: flex;
+            align-items: center;
+            letter-spacing: -0.4px;
+            word-break: keep-all; 
+        }
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 1.25rem;
+            background-color: #6f42c1;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        p { margin-bottom: 20px; font-size: 1.02rem; color: #343a40; word-break: keep-all; }
+        ul { margin-bottom: 24px; padding-left: 22px; }
+        li { margin-bottom: 10px; font-size: 0.98rem; color: #495057; }
+
+        /* 강조 카드 */
+        .summary-card {
+            background-color: #fbfbfd;
+            border: 1px solid #e9ecef;
             border-radius: 6px;
             padding: 18px 22px;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
-        .market-card strong { color: #d35400; font-size: 1.05rem; }
+        .summary-card strong { color: #212529; font-weight: 700; }
 
+        /* 표 (Table) 서식 복구 */
         table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin: 25px 0 35px; 
+            margin: 28px 0 36px 0; 
             font-size: 0.95rem; 
         }
         th, td { 
-            border: 1px solid #e0ded9; 
-            padding: 12px 14px; 
+            border: 1px solid #dee2e6; 
+            padding: 13px 16px; 
             text-align: left; 
         }
-        th { background: #fbf9f6; color: #2c3e50; font-weight: 700; width: 28%; }
-        td { background: #fff; color: #555; }
-
-        .back-link { 
-            display: inline-block; 
-            margin-top: 40px; 
-            color: #d35400; 
-            text-decoration: none; 
-            font-weight: bold; 
-            border: 1px solid #d35400; 
-            padding: 8px 18px; 
-            border-radius: 6px; 
-            transition: 0.2s; 
+        th { 
+            background: #f8f9fa; 
+            color: #212529; 
+            font-weight: 700; 
+            width: 30%; 
         }
-        .back-link:hover { background: #d35400; color: #fff; }
+        td { background: #ffffff; color: #495057; }
+
         footer { 
             text-align: center; 
-            padding: 35px 20px; 
+            padding: 30px 20px 50px; 
             font-size: 0.85rem; 
-            color: #888; 
-            margin-top: 50px; 
-            border-top: 1px solid #e8e6e1; 
+            color: #868e96; 
         }
     </style>
-    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    </script>
 </head>
 <body>
 
+    <!-- 헤더: moduin.kr & 자산관리 칼럼 목록 단일 링크 -->
     <header>
-        <div class="nav-inner">
-            <a href="../index.html" class="logo">moduin.kr</a>
-            <nav>
-                <a href="../about.html">소개</a>
-                <a href="../category-automation.html">AI·업무자동화</a>
-                <a href="../category-smartfactory.html">스마트팩토리</a>
-                <a href="../category-wealth.html" class="active">자산관리·투자</a>
-                <a href="../tools/stock-uploader.html">배포 도구</a>
-                <a href="../privacy.html">개인정보처리방침</a>
-            </nav>
+        <div class="header-inner">
+            <a href="../index.html" class="header-logo">moduin.kr</a>
+            <a href="../category-wealth.html" class="header-back">← 자산관리 칼럼 목록</a>
         </div>
     </header>
 
-    <div class="container">
-        <span class="tag-badge">자산관리·투자 · 국내증시 마감 브리핑</span>
+    <!-- 중앙 카드형 본문 컨테이너 -->
+    <main class="article-card">
+        <span class="category-label">자산관리 & 매크로 데이터</span>
         <h1>[국장 마감] 코스피·코스닥 수급 공방과 반도체·2차전지 주도권 점검</h1>
-        <div class="post-meta">게시일: 2026-11-09 · 카테고리: 자산관리·투자 · 시장 분석: 수급 분석, 지수 흐름, 리스크 관리</div>
+        <div class="post-meta">작성일: 2026년 11월 9일 · 작성자: moduin · 읽는 시간: 약 7분</div>
 
-        <div class="toc-box">
-            <h3>목차</h3>
-            <ul>
-                <li><a href="#section-1">1. 당일 주요 지수 및 수급 주체별 매매 동향</a></li>
-                <li><a href="#section-2">2. 주요 섹터별 주도권 점검: 반도체 vs 2차전지</a></li>
-                <li><a href="#section-3">3. 거시 지표 영향: 원/달러 환율과 외인 매수 강도</a></li>
-                <li><a href="#section-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</a></li>
+        <!-- 법적 고지 박스 -->
+        <div class="disclaimer-box">
+            <div class="disclaimer-title">⚠️ [필독] 법적 고지 및 투자 유의사항 (Disclaimer)</div>
+            <p>본 칼럼은 공개된 거시경제 통계와 시장 데이터를 기반으로 시스템 엔지니어링 관점에서 기술적 현황을 분석·기록한 학술적 칼럼입니다.</p>
+            <p><strong>특정 금융투자상품의 매수·매도를 권유하거나 개별 종목에 대한 투자 자문 및 조언을 제공하지 않습니다.</strong></p>
+            <p>모든 투자의 의사결정과 손익 책임은 전적으로 투자자 본인에게 귀속됩니다.</p>
+        </div>
+
+        <!-- 목차 -->
+        <div class="toc-card">
+            <div class="toc-title">목차</div>
+            <ul class="toc-list">
+                <li><a href="#sec-1">1. 당일 주요 지수 및 수급 주체별 매매 동향</a></li>
+                <li><a href="#sec-2">2. 주요 섹터별 주도권 점검: 반도체 vs 2차전지</a></li>
+                <li><a href="#sec-3">3. 거시 지표 영향: 원/달러 환율과 외인 매수 강도</a></li>
+                <li><a href="#sec-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</a></li>
             </ul>
         </div>
 
@@ -192,7 +225,7 @@
 
         <p>시장 참여자들의 감정이나 희망회로를 배제하고, 금일 장 마감 기준 주요 수급 데이터와 지수 지지 라인, 그리고 차주 대응 전략을 객관적인 관점에서 정리합니다.</p>
 
-        <h2 id="section-1">1. 당일 주요 지수 및 수급 주체별 매매 동향</h2>
+        <h2 id="sec-1">1. 당일 주요 지수 및 수급 주체별 매매 동향</h2>
         <p>코스피는 대형주 중심의 외국인 프로그램 순매도 압력이 이어지며 지수 상단이 제한되었고, 코스닥은 개별 종목 장세의 변동성이 극대화되었습니다.</p>
         <ul>
             <li><strong>외국인 수급:</strong> 선물 시장에서 방향성을 제한하며 현물 대형 반도체 중심으로 보수적인 포지션을 유지.</li>
@@ -200,303 +233,44 @@
             <li><strong>개인 수급:</strong> 낙폭 과대 섹터 중심의 순매수가 이어졌으나 지수 반등의 주도 동력으로는 부족한 흐름.</li>
         </ul>
 
-        <h2 id="section-2">2. 주요 섹터별 주도권 점검: 반도체 vs 2차전지</h2>
+        <h2 id="sec-2">2. 주요 섹터별 주도권 점검: 반도체 vs 2차전지</h2>
         <p>지수 영향력이 가장 큰 두 주력 섹터의 엇갈린 주도권과 자금 흐름 점검입니다.</p>
 
-        <div class="market-card">
+        <div class="summary-card">
             <p><strong>반도체 섹터 (AI 인프라 및 메모리):</strong><br>
             글로벌 빅테크 투자 사이클 이슈로 장 초반 흔들림이 있었으나, 고대역폭메모리(HBM) 및 장비 밸류체인은 견고한 하방 지지력을 보였습니다. 단기 과열 해소 국면으로 진입하며 호실적 기반 종목 중심의 옥석 가리기가 진행 중입니다.</p>
         </div>
 
-        <div class="market-card">
+        <div class="summary-card">
             <p><strong>2차전지 섹터 (소재 및 셀):</strong><br>
             전방 전기차(EV) 수요 회복 속도에 대한 경계감과 원자재 가격 변동성으로 인해 반등 시마다 매물 출회 압박을 받았습니다. 펀더멘털의 본격 턴어라운드 전까지는 추세 매수보다는 박스권 트레이딩 관점 접근이 유효합니다.</p>
         </div>
 
-        <h2 id="section-3">3. 거시 지표 영향: 원/달러 환율과 외인 매수 강도</h2>
+        <h2 id="sec-3">3. 거시 지표 영향: 원/달러 환율과 외인 매수 강도</h2>
         <p>국장 수급의 열쇠를 쥐고 있는 원/달러 환율의 밴드 상단 경계감과 외인 현물 매수 유입 여부입니다.</p>
 
         <table>
-            <tr>
-                <th>거시/수급 지표</th>
-                <th>시장 영향 및 평가</th>
-            </tr>
-            <tr>
-                <td>원/달러 환율 레벨</td>
-                <td>환율이 상단 저항선 부근에서 고착화되며 환차손을 우려한 패시브 펀드의 대규모 현물 매수 유입을 제약</td>
-            </tr>
-            <tr>
-                <td>외인 선물 포지션</td>
-                <td>단기 롤오버 및 지수 헷지성 숏 포지션이 혼재되어 지수의 급등락을 유발하는 트리거로 작용</td>
-            </tr>
-            <tr>
-                <td>거래대금 추이</td>
-                <td>양 시장 합산 거래대금이 박스권 하단에 머물며 주도주 외 개별 테마주 순환매 장세 연출</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>거시/수급 지표</th>
+                    <th>시장 영향 및 평가</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>원/달러 환율 레벨</td>
+                    <td>환율이 상단 저항선 부근에서 고착화되며 환차손을 우려한 패시브 펀드의 대규모 현물 매수 유입을 제약</td>
+                </tr>
+                <tr>
+                    <td>외인 선물 포지션</td>
+                    <td>단기 롤오버 및 지수 헷지성 숏 포지션이 혼재되어 지수의 급등락을 유발하는 트리거로 작용</td>
+                </tr>
+                <tr>
+                    <td>거래대금 추이</td>
+                    <td>양 시장 합산 거래대금이 박스권 하단에 머물며 주도주 외 개별 테마주 순환매 장세 연출</td>
+                </tr>
+            </tbody>
         </table>
 
-        <h2 id="section-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</h2>
-        <p>지수가 뚜렷한 추세를 형성하기 전까지 무리한 비중 확대나 막연한 낙폭 과대 매수는 손실폭을 키우기 쉽습니다. 다음 세 가지 원칙을 중심으로 대응 포트폴리오를 유지해야 합니다.</p>
-        <ul>
-            <li><strong>현금 비중 30% 이상 유지:</strong> 지수 급변동에 따른 저가 매수 기회를 위해 무리한 풀베팅 자제.</li>
-            <li><strong>실적 확인 없는 테마주 추격 매수 금지:</strong> 수급 연속성이 없는 단기 찌라시/테마 종목은 당일 청산 원칙 준수.</li>
-            <li><strong>주요 지지선 이탈 시 기계적 손절(Loss-Cut):</strong> 기술적 저지선 하향 이탈 시 감정을 배제하고 비중 축소 후 현금 확보.</li>
-        </ul>
-
-        <a href="../category-wealth.html" class="back-link">← 자산관리·투자 목록으로 돌아가기</a>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
-    </footer>
-
-</body>
-</html>
-            z-index: 100; 
-        }
-        .nav-inner { 
-            max-width: 900px; 
-            margin: 0 auto; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex-wrap: wrap; 
-            gap: 15px; 
-        }
-        .logo { font-size: 1.25rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
-        nav { display: flex; gap: 16px; flex-wrap: wrap; }
-        nav a { text-decoration: none; color: #555; font-weight: 600; font-size: 0.95rem; }
-        nav a:hover, nav a.active { color: #d35400; font-weight: 800; }
-
-        .container { 
-            max-width: 900px; 
-            margin: 40px auto; 
-            padding: 45px 35px; 
-            background: #fff; 
-            border-radius: 10px; 
-            border: 1px solid #e8e6e1; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-        }
-        .tag-badge { 
-            background: #eef7f2; 
-            color: #27ae60; 
-            padding: 5px 12px; 
-            border-radius: 20px; 
-            font-size: 0.82rem; 
-            font-weight: 800; 
-            display: inline-block; 
-            margin-bottom: 14px; 
-        }
-        h1 { font-size: 2rem; color: #2c3e50; margin-bottom: 14px; line-height: 1.35; word-break: keep-all; }
-        .post-meta { font-size: 0.9rem; color: #7f8c8d; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-
-        .toc-box {
-            background: #fdfdfd;
-            border: 1px solid #e2e0db;
-            border-left: 4px solid #27ae60;
-            padding: 20px 24px;
-            border-radius: 6px;
-            margin-bottom: 35px;
-        }
-        .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
-        .toc-box ul { list-style: none; padding-left: 5px; margin-bottom: 0; }
-        .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
-        .toc-box a { color: #555; text-decoration: none; }
-        .toc-box a:hover { color: #d35400; text-decoration: underline; }
-
-        h2 { 
-            font-size: 1.45rem; 
-            color: #2c3e50; 
-            margin: 45px 0 18px; 
-            border-left: 4px solid #27ae60; 
-            padding-left: 14px; 
-            word-break: keep-all; 
-        }
-        h3 { font-size: 1.15rem; color: #34495e; margin: 25px 0 12px; }
-        p { margin-bottom: 18px; font-size: 1.02rem; color: #444; word-break: keep-all; }
-        ul, ol { margin-bottom: 25px; padding-left: 22px; }
-        li { margin-bottom: 10px; font-size: 0.98rem; color: #444; }
-
-        pre { 
-            background: #282c34; 
-            color: #abb2bf; 
-            padding: 20px; 
-            border-radius: 8px; 
-            overflow-x: auto; 
-            font-family: 'Consolas', 'Courier New', monospace; 
-            font-size: 0.9rem; 
-            line-height: 1.6; 
-            margin: 25px 0; 
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.2); 
-        }
-
-        .step-card {
-            background: #f9fbf9;
-            border: 1px solid #e0ede4;
-            border-radius: 6px;
-            padding: 18px 22px;
-            margin-bottom: 15px;
-        }
-        .step-card strong { color: #27ae60; font-size: 1.05rem; }
-
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin: 25px 0 35px; 
-            font-size: 0.95rem; 
-        }
-        th, td { 
-            border: 1px solid #e0ded9; 
-            padding: 12px 14px; 
-            text-align: left; 
-        }
-        th { background: #f7f6f2; color: #2c3e50; font-weight: 700; width: 28%; }
-        td { background: #fff; color: #555; }
-
-        .back-link { 
-            display: inline-block; 
-            margin-top: 40px; 
-            color: #d35400; 
-            text-decoration: none; 
-            font-weight: bold; 
-            border: 1px solid #d35400; 
-            padding: 8px 18px; 
-            border-radius: 6px; 
-            transition: 0.2s; 
-        }
-        .back-link:hover { background: #d35400; color: #fff; }
-        footer { 
-            text-align: center; 
-            padding: 35px 20px; 
-            font-size: 0.85rem; 
-            color: #888; 
-            margin-top: 50px; 
-            border-top: 1px solid #e8e6e1; 
-        }
-    </style>
-    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    </script>
-</head>
-<body>
-
-    <header>
-        <div class="nav-inner">
-            <a href="../index.html" class="logo">moduin.kr</a>
-            <nav>
-                <a href="../about.html">소개</a>
-                <a href="../category-automation.html">AI·업무자동화</a>
-                <a href="../category-smartfactory.html" class="active">스마트팩토리</a>
-                <a href="../category-wealth.html">자산관리·투자</a>
-                <a href="../tools/stock-uploader.html">배포 도구</a>
-                <a href="../privacy.html">개인정보처리방침</a>
-            </nav>
-        </div>
-    </header>
-
-    <div class="container">
-        <span class="tag-badge">스마트팩토리 · 현장 아키텍처</span>
-        <h1>[스마트팩토리] 중소 제조현장 레거시 PLC 연동을 위한 경량 엣지 데이터 브로커 설계</h1>
-        <div class="post-meta">게시일: 2026-11-09 · 카테고리: 스마트팩토리 · 핵심 주제: 설비 인터페이스, 무손실 데이터 파이프라인</div>
-
-        <div class="toc-box">
-            <h3>목차</h3>
-            <ul>
-                <li><a href="#section-1">1. 현장의 근본 문제와 설계 요건</a></li>
-                <li><a href="#section-2">2. 핵심 아키텍처: 생산자-소비자 분리 및 페일오버</a></li>
-                <li><a href="#section-3">3. 무손실 3단계 트랜잭션 파이프라인 (동작 원리)</a></li>
-                <li><a href="#section-4">4. 솔루션 상품화 및 판매 포인트</a></li>
-            </ul>
-        </div>
-
-        <p>중소·중견 제조 현장의 MES/스마트팩토리 구축 시 가장 빈번하게 터지는 문제는 상위 시스템의 기능 부족이 아닙니다. 현장 PLC 설비와 상위 DB(MS-SQL, Oracle) 사이의 <strong>통신 단절 및 데이터 유실 처리 부재</strong>입니다.</p>
-
-        <p>라인 현장에서는 네트워크 순단이나 상위 서버 점검이 수시로 발생합니다. 이때 PLC 통신 프로그램이 상위 DB에 직접 연결을 시도하는 구조라면 타임아웃으로 인해 설비 인터락이 걸리거나, 생산 실적과 센서 데이터가 통째로 증발합니다. 그렇다고 라인마다 수천만 원을 호가하는 외산 OPC 서버나 미들웨어를 도입하는 것은 단가 타산이 맞지 않습니다.</p>
-
-        <p>이 문제를 해결하고 독립 패키지(SW 라이선스 형태)로 판매 가능한 <strong>'스마트팩토리 무손실 엣지 데이터 브로커(Edge Data Broker)'</strong> 아키텍처와 핵심 메커니즘을 정리합니다.</p>
-
-        <h2 id="section-1">1. 현장의 근본 문제와 설계 요건</h2>
-        <p>현장 설비 데이터 수집기는 단순 통신 라이브러리 조합만으로 끝나지 않습니다. 공장 바닥에서 무인으로 365일 돌아가려면 세 가지 조건이 필수적입니다.</p>
-        <ul>
-            <li><strong>프로토콜 격리:</strong> LS ELECTRIC(XGT), 미쓰비시(MC Protocol), 지멘스(S7), 모드버스(Modbus TCP) 등 설비별 수집 드라이버와 상위 전송 모듈의 완전한 분리.</li>
-            <li><strong>무손실 저장 후 전달 (Store-and-Forward):</strong> 상위망 장애 시 고속 메모리 큐에서 로컬 디스크 링버퍼로 즉시 우회하여 1건의 누락도 방지.</li>
-            <li><strong>가벼운 풋프린트:</strong> 저사양 산업용 미니 PC(IPC, 4GB RAM 수준)에서도 CPU 점유율 2% 미만을 유지하는 백그라운드 무인 서비스 구동.</li>
-        </ul>
-
-        <h2 id="section-2">2. 핵심 아키텍처: 생산자-소비자 분리 및 페일오버</h2>
-        <p>아키텍처의 중심은 <strong>생산자-소비자(Producer-Consumer) 패턴의 철저한 격리</strong>입니다. 설비 수집기는 통신 패킷을 내부 버퍼에 밀어 넣기만 하고 즉시 다음 주기를 폴링하며, 전송기는 네트워크 상태를 감시하며 상위 시스템으로 데이터를 쏩니다.</p>
-
-<pre><code>[PLC 설비군 (LS/Mitsubishi/Modbus)]
-         │ (100ms~500ms 주기 폴링)
-         ▼
-[수집 엔진 (Protocol Driver)]
-         │
-         ▼
-[고속 메모리 큐 (Bounded Queue)]
-         │
-         ├── [네트워크 정상] ──► [상위 MES REST API / MS-SQL 벌크 저장]
-         │
-         └── [통신 두절 감지] ──► [로컬 디스크 링버퍼 (Store)]
-                                    │
-                              (망 정상 복구 감지)
-                                    ▼
-                             (순차적 과거 데이터 백필 Forward)</code></pre>
-
-        <h2 id="section-3">3. 무손실 3단계 트랜잭션 파이프라인 (동작 원리)</h2>
-        <p>현장에서 시스템이 정지하지 않고 데이터를 지켜내는 구체적인 3단계 동작 흐름입니다.</p>
-
-        <div class="step-card">
-            <p><strong>1단계: 고속 메모리 적재 (Non-blocking Ingest)</strong><br>
-            PLC 드라이버가 읽어온 태그 데이터는 상위 통신 상태와 무관하게 즉시 메모리 큐에 적재됩니다. 상위 시스템 지연이 설비 통신 주기에 전혀 영향을 주지 않습니다.</p>
-        </div>
-
-        <div class="step-card">
-            <p><strong>2단계: 통신 단절 감지 및 로컬 긴급 대피 (Store)</strong><br>
-            상위 서버와의 하트비트가 끊기면 디스패처는 즉시 로컬 디스크의 바이너리 저널 파일로 스트림을 우회시킵니다. 메모리 오버플로우를 막고 전원이 꺼져도 데이터가 보존됩니다.</p>
-        </div>
-
-        <div class="step-card">
-            <p><strong>3단계: 망 복구 감지 및 시계열 역순 백필 (Forward)</strong><br>
-            상위 서버 연결이 복구되면 실시간 데이터와 함께 로컬에 누적된 과거 데이터를 타임스탬프 순서대로 순차 전송(Backfill)한 뒤 버퍼를 자동 회수합니다.</p>
-        </div>
-
-        <h2 id="section-4">4. 솔루션 상품화 및 판매 포인트</h2>
-        <p>단순 프로젝트성 코드가 아니라, 중소 제조사에 독립 라이선스 형태로 공급 가능한 상품화 스펙입니다.</p>
-
-        <table>
-            <tr>
-                <th>구성 항목</th>
-                <th>상용 패키징 구현 스펙</th>
-            </tr>
-            <tr>
-                <td>라이선스 체계</td>
-                <td>메인보드 UUID + MAC 기반 하드웨어 락(HWID), 라인당 영구 라이선스</td>
-            </tr>
-            <tr>
-                <td>설정 인터페이스</td>
-                <td>경량 로컬 웹 콘솔 제공, 브라우저에서 태그 매핑(CSV 일괄 등록/내보내기)</td>
-            </tr>
-            <tr>
-                <td>모니터링</td>
-                <td>일자별 통신 성공률, 유실 복구 건수, 초당 처리 패킷(TPS) 상태 확인</td>
-            </tr>
-            <tr>
-                <td>타깃 시장</td>
-                <td>외산 솔루션 단가가 부담스럽고, 라인 데이터 표준화가 시급한 50인 미만 중소 제조사</td>
-            </tr>
-        </table>
-
-        <p>스마트팩토리 현장에서 가장 필요한 것은 거창한 AI 분석 모델 이전에 <strong>바닥의 센서·PLC 데이터를 단 1초도 빠짐없이 상위로 올려주는 견고한 파이프라인</strong>입니다. 설비 인터페이스 표준화와 로컬 페일오버 기능을 갖춘 경량 브로커는 중소 제조 공장에 장비 단위로 납품하거나, SI 프로젝트마다 재사용 가능한 표준 자산으로 가치가 충분합니다.</p>
-
-        <a href="../category-smartfactory.html" class="back-link">← 스마트팩토리 목록으로 돌아가기</a>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
-    </footer>
-
-</body>
-</html>
+        <h2 id="sec-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</h2>
+        <p>지수가 뚜렷한 추세를 형성하기 전까지 무리한 비중 확대나 막연한 낙폭 과대 매수는 손실폭
