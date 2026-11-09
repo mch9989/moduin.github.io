@@ -373,7 +373,7 @@
             reader.readAsDataURL(file);
         }
 
-        // 3. 실제 Gemini 1.5 Flash API 직접 호출
+        // 3. 실제 Gemini API 직접 호출 (모델 자동 폴백 및 404 대응)
         async function executeRealGeminiAnalysis() {
             const apiKey = document.getElementById('apiKeyInput').value.trim();
             const consoleBox = document.getElementById('outputConsole');
@@ -389,9 +389,16 @@
                 return;
             }
 
-            consoleBox.innerHTML = "// [실시간 쿼리 전송 중...]\n// Gemini 1.5 Flash Vision 모델로 비동기 전송 중입니다...";
+            consoleBox.innerHTML = "// [실시간 쿼리 전송 중...]\n// Gemini Vision 모델로 비동기 전송 중입니다...";
 
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            // 후보 모델 목록 (우선순위 순서대로 시도)
+            const candidateModels = [
+                "gemini-1.5-flash-latest",
+                "gemini-2.0-flash",
+                "gemini-1.5-flash-002",
+                "gemini-1.5-pro-latest"
+            ];
+
             const promptText = "이 이미지를 상업용 스톡 사진 플랫폼 관점에서 분석해줘. 반드시 JSON 형식으로만 답해.\n" +
                                "스키마: {\n" +
                                "  \"title\": \"간결하고 명확한 영문 제목\",\n" +
@@ -410,30 +417,44 @@
             };
 
             const startTime = performance.now();
+            let lastError = null;
 
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
+            // 모델별 순차 시도
+            for (const model of candidateModels) {
+                try {
+                    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestBody)
+                    });
 
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                    if (response.ok) {
+                        const result = await response.json();
+                        const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+                        const rawJsonText = result.candidates[0].content.parts[0].text;
+                        const parsedData = JSON.parse(rawJsonText);
+                        parsedData.processing_time = `${duration}s (Live API Response)`;
+                        parsedData.connected_model = model;
+
+                        consoleBox.innerHTML = JSON.stringify(parsedData, null, 2);
+                        return; // 성공 시 즉시 종료
+                    } else {
+                        const errText = await response.text();
+                        lastError = `[${model}] HTTP ${response.status}: ${errText}`;
+                    }
+                } catch (e) {
+                    lastError = `[${model}] 네트워크 에러: ${e.message}`;
                 }
-
-                const result = await response.json();
-                const duration = ((performance.now() - startTime) / 1000).toFixed(2);
-                const rawJsonText = result.candidates[0].content.parts[0].text;
-                const parsedData = JSON.parse(rawJsonText);
-                parsedData.processing_time = `${duration}s (Live API Response)`;
-
-                consoleBox.innerHTML = JSON.stringify(parsedData, null, 2);
-
-            } catch (err) {
-                consoleBox.innerHTML = `// [에러 발생]\n// ${err.message}\n\n※ API Key가 유효한지 확인해 주세요.`;
             }
+
+            // 모든 모델 시도 실패 시 상세 안내
+            consoleBox.innerHTML = `// [모든 모델 호출 실패]\n// ${lastError}\n\n` +
+                `※ 체크리스트:\n` +
+                `1. 키가 https://aistudio.google.com/app/apikey 에서 발급된 순수 Gemini API 키인지 확인해 주세요.\n` +
+                `2. 구글 클라우드 콘솔(GCP) 키라면 'Generative Language API' 라이브러리가 활성화되어 있는지 확인해 주세요.`;
+        
         }
 
         // 초기 화면 구동 (캠핑 샘플 자동 로드)
