@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국내 증시 현황과 거시경제 유동성 지표 기반 단기 장세 진단 - moduin.kr</title>
+    <link rel="canonical" href="https://moduin.kr/wealth/post-09.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #faf9f7; color: #333; line-height: 1.85; }
+        header { background: #fff; border-bottom: 1px solid #e0ded9; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .nav-inner { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: #2c3e50; text-decoration: none; }
+        .container { max-width: 860px; margin: 40px auto; padding: 45px 35px; background: #fff; border-radius: 10px; border: 1px solid #e8e6e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .tag { color: #8e44ad; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; }
+        h1 { font-size: 1.85rem; color: #2c3e50; margin: 8px 0 15px; word-break: keep-all; line-height: 1.4; }
+        .meta { font-size: 0.85rem; color: #888; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+
+        /* 법적 면책 공지 배너 */
+        .disclaimer-box {
+            background-color: #fdf2f2;
+            border: 2px solid #e74c3c;
+            color: #922b21;
+            padding: 18px 22px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+        .disclaimer-box strong { font-size: 1rem; color: #c0392b; display: block; margin-bottom: 6px; }
+
+        .toc-box { background-color: #fdfcf9; border: 1px solid #e2ded7; border-left: 4px solid #8e44ad; padding: 20px 25px; border-radius: 6px; margin-bottom: 35px; }
+        .toc-box h3 { font-size: 1.05rem; color: #2c3e50; margin-bottom: 10px; }
+        .toc-box ul { list-style: none; padding-left: 5px; }
+        .toc-box li { margin-bottom: 6px; font-size: 0.95rem; }
+        .toc-box a { color: #555; text-decoration: none; font-weight: 600; }
+        .toc-box a:hover { color: #8e44ad; text-decoration: underline; }
+        h2 { font-size: 1.35rem; color: #34495e; margin: 40px 0 15px; border-left: 4px solid #8e44ad; padding-left: 12px; }
+        p { margin-bottom: 18px; font-size: 1.02rem; word-break: keep-all; color: #3f3f3f; }
+        ul, ol { margin-bottom: 20px; padding-left: 22px; }
+        li { margin-bottom: 8px; font-size: 1rem; color: #444; }
+        pre { background: #23272e; color: #abb2bf; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0 25px; font-size: 0.9rem; font-family: 'Consolas', monospace; line-height: 1.6; }
+        .highlight-box { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #8e44ad; padding: 18px 22px; border-radius: 6px; margin: 25px 0; }
+        .back-link { display: inline-block; margin-top: 40px; color: #8e44ad; text-decoration: none; font-weight: bold; }
+        footer { text-align: center; padding: 35px 20px; font-size: 0.85rem; color: #888; margin-top: 40px; }
+    </style>
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-P4TG8SLQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="nav-inner">
+            <a href="../index.html" class="logo">moduin.kr</a>
+            <a href="../category-wealth.html" style="text-decoration:none; color:#555; font-size:0.9rem; font-weight:600;">← 자산관리 칼럼 목록</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <span class="tag">자산관리 & 매크로 데이터</span>
+        <h1>국내 증시 현황과 거시경제 유동성 지표 기반 단기 장세 진단</h1>
+        <div class="meta">작성일: 2026년 11월 9일 · 작성자: moduin · 읽는 시간: 약 9분</div>
+
+        <!-- 필수 법적 경고문 (상단) -->
+        <div class="disclaimer-box">
+            <strong>⚠️ [필독] 법적 고지 및 투자 유의사항 (Disclaimer)</strong>
+            본 칼럼은 공개된 거시경제 통계와 시장 데이터를 기반으로 시스템 엔지니어링 관점에서 기술적 현황을 분석·기록한 학술적 칼럼입니다. <strong>특정 금융투자상품의 매수·매도를 권유하거나 개별 종목에 대한 투자 자문 및 조언을 제공하지 않습니다.</strong> 모든 투자의 의사결정과 손익 책임은 전적으로 투자자 본인에게 귀속됩니다.
+        </div>
+
+        <div class="toc-box">
+            <h3>목차</h3>
+            <ul>
+                <li><a href="#sec1">1. 서론: 감정과 희망회로를 배제한 냉정한 시장 데이터 읽기</a></li>
+                <li><a href="#sec2">2. 현재 국내 증시의 3대 핵심 거시 매크로 환경</a></li>
+                <li><a href="#sec3">3. 외국인·기관 수급 구조와 고객예탁금 추이 분석</a></li>
+                <li><a href="#sec4">4. 단기 시장 시나리오와 시스템 트레이더의 위험 관리</a></li>
+                <li><a href="#sec5">5. 결론: 예측의 영역이 아닌 대응과 현금 비중 원칙</a></li>
+            </ul>
+        </div>
+
+        <h2 id="sec1">1. 서론: 감정과 희망회로를 배제한 냉정한 시장 데이터 읽기</h2>
+        <p>시장 참여자들이 가장 흔하게 범하는 실수는 "이 정도 빠졌으니 이제 반등하겠지"라는 근거 없는 기대감(희망회로)으로 위험자산 비중을 늘리는 것입니다. 가격 변동은 심리가 아니라 글로벌 금리, 달러 유동성, 그리고 수급 주체의 자금 흐름이라는 물리적 데이터의 결과물입니다. 과거 유사 국면의 역사적 데이터를 바탕으로 현 증시의 위치를 진단합니다.</p>
+
+        <h2 id="sec2">2. 현재 국내 증시의 3대 핵심 거시 매크로 환경</h2>
+        <p>현재 코스피 및 코스닥 시장을 둘러싼 거시적 여건은 결코 우호적이지 않은 복합적 하방 압력 국면에 위치해 있습니다.</p>
+        <ul>
+            <li><strong>원/달러 환율과 외환시장 압력:</strong> 원/달러 환율이 높은 변동성을 유지하는 구간에서는 외국인 패시브(ETF) 자금의 환차손 리스크가 극대화되어 코스피 대형 반도체 및 제조업 종목에 대한 순매도가 기계적으로 출회됩니다.</li>
+            <li><strong>미국 기준금리 정책 경로와 스프레드:</strong> 한미 금리 역전차가 지속되는 환경에서 한국은행의 독자적인 통화 완화(유동성 공급) 여력은 제한적이며, 이는 증시의 밸류에이션(PER/PBR) 상단을 강하게 누르는 요소입니다.</li>
+            <li><strong>글로벌 교역량과 제조업 경기 사이클:</strong> 한국 수출 데이터와 연동되는 글로벌 선행지수가 둔화 국면에 머물러 있어, 기업 이익 추정치(EPS)의 추세적 상향이 수반되지 않은 기술적 반등은 지속성이 짧습니다.</li>
+        </ul>
+
+<pre>
+[글로벌 매크로 변수]
+ 달러 인덱스 강세 + 미 국채 금리 변동성
+         │
+         ▼
+[국내 자본시장 파급]
+ 원화 약세 ──► 외국인 패시브 자금 매도 우위 ──► 대형주 지수 하방 압력
+         │
+         ▼
+[국내 유동성 환경]
+ 고객예탁금 정체 + 신용융자 잔고 부담 ──► 개별 테마주 급등락 및 갭하락 위험
+</pre>
+
+        <h2 id="sec3">3. 외국인·기관 수급 구조와 고객예탁금 추이 분석</h2>
+        <p>국내 증시의 엔진 역할을 하는 투자자예탁금은 추가적인 유입세가 둔화된 채 박스권에 갇혀 있습니다. 장세를 주도할 신규 매수 자금이 유입되지 않는 상태에서 특정 테마(원전, 방산, 로봇, 바이오 등)로만 단기 수급이 쏠리는 '빈집털이식 순환매'가 전개되고 있으며, 이는 거래 대금이 실리지 않는 가짜 돌파(False Breakout)를 다수 발생시킵니다.</p>
+
+        <h2 id="sec4">4. 단기 시장 시나리오와 시스템 트레이더의 위험 관리</h2>
+        <div class="highlight-box">
+            <strong>과거 데이터가 증명하는 패턴:</strong> 거래대금이 감소하는 하락 박스권 장세에서 성급한 분할 매수나 물타기는 자본의 시간 기회비용을 갉아먹습니다. 20일 이동평균선이 하향 횡보하고 외인 선물 누적 포지션이 매도 우위인 구간에서는 단기 반등 시 비중 축소가 통계적으로 우월한 기대값을 보여줍니다.
+        </div>
+        <p>단기적으로 시장은 지수 전체의 추세적 상승보다는 좁은 박스권 하단 테스트를 반복할 가능성이 높습니다. 선물 옵션 만기일 전후로 왝더독(Wag the dog, 선물 수급이 현물 지수를 흔드는 현상)이 빈번하게 관측되므로 레버리지 사용은 극도로 지양해야 합니다.</p>
+
+        <h2 id="sec5">5. 결론: 예측의 영역이 아닌 대응과 현금 비중 원칙</h2>
+        <p>퀀트 엔지니어의 시각에서 현 시장은 '베팅할 때'가 아니라 '현금(Cash)이라는 무기를 확보한 채 원칙이 서는 변곡점(환율 안정 + 외인 수급 순유입 전환)을 대기할 때'입니다. 시장을 이기려 하지 않고 데이터가 가리키는 방어적 포지션을 지키는 것이 장기 복리 수익률을 방어하는 유일한 길입니다.</p>
+
+        <!-- 필수 법적 경고문 (하단) -->
+        <div class="disclaimer-box" style="margin-top: 40px;">
+            <strong>⚠️ [법적 고지 재확인]</strong>
+            본 문서는 정보 제공 및 분석 기록용으로 작성되었으며, 금융상품 매매에 대한 권유나 자문이 아닙니다. 과거의 지표 추이가 미래의 수익을 보장하지 않으며, 모든 투자 결정에 따른 책임은 투자자 본인에게 있습니다.
+        </div>
+
+        <a href="../category-wealth.html" class="back-link">← 자산관리·투자 칼럼 목록으로 돌아가기</a>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr & PlatformWorks. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
