@@ -1,0 +1,55 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계</title><meta name="description" content="[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계"><link rel="canonical" href="https://moduin.kr/automation/post-08.html"><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-P4TG8SLQ');</script>
+<style>
+* { box-sizing:border-box } body { margin:0; font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:#faf9f7; color:#333; line-height:1.75 }
+header { background:#fff; border-bottom:1px solid #e8e6e1; padding:15px 20px; position:sticky; top:0; z-index:100 }
+.nav-inner { max-width:1000px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px }
+.logo { font-size:1.3rem; font-weight:800; color:#2c3e50; text-decoration:none } .nav-inner nav { display:flex; flex-wrap:wrap; gap:18px }
+.nav-inner nav a { text-decoration:none; color:#555; font-weight:600; font-size:.95rem } .nav-inner nav a:hover { color:#d35400 }
+main { max-width:900px; margin:40px auto; padding:0 20px } article { background:#fff; border:1px solid #e8e6e1; border-radius:10px; padding:32px; overflow-wrap:anywhere }
+h1,h2,h3 { color:#2c3e50; line-height:1.35 } time { color:#777; font-size:.9rem } a { color:#2455a4 } img { max-width:100%; height:auto }
+pre { overflow:auto; background:#f3f4f6; padding:1rem; border-radius:6px } code { font-family:Consolas,monospace } .toc { background:#f4f1ea; padding:12px 20px; margin:24px 0; border-radius:8px }
+footer { padding:30px 20px; color:#777; font-size:.88rem; background:#f2eee9; border-top:1px solid #e2ded7; text-align:center; margin-top:60px } footer a { color:#555 }
+@media(max-width:600px) { header { position:static } .nav-inner nav { gap:10px } main { margin:20px auto; padding:0 12px } article { padding:20px } }
+</style></head><body><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P4TG8SLQ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><header><div class="nav-inner"><a href="../index.html" class="logo">moduin.kr</a><nav aria-label="주 메뉴">
+<a href="../about.html">소개</a><a href="../category-automation.html">AI·업무자동화</a><a href="../category-smartfactory.html">스마트팩토리</a><a href="../category-wealth.html">자산관리·투자</a><a href="../tools/stock-uploader.html">배포 도구</a><a href="../privacy.html">개인정보처리방침</a>
+</nav></div></header><main><article><h1>[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계</h1><time datetime="2026-11-10">2026-11-10</time><nav class="toc" aria-label="목차"><h2>목차</h2><ul><li><a href="#section-1">목차</a></li><li><a href="#section-2">1. 화면 기반 RPA가 실무 환경에서 깨지는 세 가지 지점</a></li><li><a href="#section-3">2. 3단계 헤드리스 자동화 아키텍처 (UI 바이패스)</a></li></ul></nav><p>현업 부서에서 "업무 자동화"를 도입한다고 할 때 열에 아홉은 화면 마우스 클릭을 녹화하는 형태의 상용 RPA나 매크로 툴을 들고 온다. 도입 초기 한두 달은 작업 시간이 줄어든 것처럼 보이지만, 분기가 지나고 연말이 되면 해당 봇(Bot)은 멈춰 있거나 담당자 자리의 애물단지로 전락한다.</p>
+<p>원인은 명확하다. 웹 브라우저의 DOM 구조 변경, OS 폰트 배율 수정, 갑작스러운 보안 백신 팝업, 세션 만료 같은 사소한 예외 하나에도 화면 좌표 기반 봇은 즉시 뻗어버리기 때문이다. 사람이 모니터 앞을 지키면서 에러 날 때마다 재시작 버튼을 눌러줘야 한다면 그것은 자동화가 아니라 또 다른 수작업 감시 업무에 불과하다.</p>
+<p>365일 무인으로 운영되는 안정적인 업무 자동화를 구축하려면 UI 레이어를 걷어내고, <strong>백엔드 트랜잭션과 OS 이벤트 기반의 헤드리스(Headless) 파이프라인</strong>으로 설계해야 한다.</p>
+<hr>
+<h3 id="section-1">목차</h3>
+<ol>
+<li>화면 기반 RPA가 실무 환경에서 깨지는 세 가지 지점</li>
+<li>3단계 헤드리스 자동화 아키텍처 (UI 바이패스)</li>
+<li>예외 복구와 데이터 무결성을 위한 필수 메커니즘</li>
+<li>운영 리소스를 최소화하는 배포 및 패키징 기준</li>
+</ol>
+<hr>
+<h2 id="section-2">1. 화면 기반 RPA가 실무 환경에서 깨지는 세 가지 지점</h2>
+<p>UI 자동화 도구가 실무 현장에서 지속성을 갖지 못하는 구조적 이유는 세 가지다.</p>
+<ul>
+<li><strong>환경 의존성 결함:</strong> 작업 PC의 해상도 변경, 듀얼 모니터 위치 변경, 윈도우 업데이트로 인한 렌더링 딜레이 등 비결정론적(Non-deterministic) 변수에 의해 클릭 실패 발생.</li>
+<li><strong>상태 동기화 부재:</strong> 웹 페이지 비동기 통신(Ajax) 로딩이 네트워크 지연으로 1초만 늦어져도 타임아웃 예외가 터지며 프로세스 중단.</li>
+<li><strong>세션 단절 대응 불가:</strong> 캡차(CAPTCHA), 일회용 OTP, 일정 시간 미입력에 따른 세션 강제 로그아웃 발생 시 자체 복구 불가.</li>
+</ul>
+<p>결국 브라우저를 직접 띄워 사람 흉내를 내는 방식은 테스트 검증용(E2E Test)으로는 적합할지 몰라도, 회사의 정기 업무를 책임지는 파이프라인으로는 낙제점이다.</p>
+<hr>
+<h2 id="section-3">2. 3단계 헤드리스 자동화 아키텍처 (UI 바이패스)</h2>
+<p>견고한 자동화는 화면을 전혀 띄우지 않는 백그라운드 데몬(Daemon) 형태로 돌아가야 한다.</p>
+<pre><code class="language-text">[입력 트리거]
+   ├── 사내 공유폴더 엑셀 파일 드롭 (FileSystemWatcher)
+   └── 일정 주기 도달 (Cron / Task Scheduler)
+         │
+         ▼
+[엔진 레이어 (Headless Broker)]
+   ├── 1단계: 세션 탈취 및 헤드리스 REST API 직접 호출 (UI 우회)
+   ├── 2단계: 데이터 정규화 및 메모리 파싱
+   └── 3단계: 트랜잭션 검증 (DB / ERP 일괄 반영)
+         │
+         ▼
+[출력 및 알림]
+   ├── 처리 완료 파일 자동 아카이빙 (Archive)
+   └── 메신저(슬랙/웹훅) 에러 로그 및 마감 보고서 발송
+</code></pre>
+</article></main>
+<footer><p>© 2026 moduin.kr &amp; PlatformWorks. All Rights Reserved.</p><a href="../privacy.html">개인정보처리방침</a> | <a href="../index.html">메인으로 이동</a></footer></body></html>
