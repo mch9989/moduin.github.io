@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- 메인 대문 및 주요 소개/도구 페이지 -->
   <url>
@@ -123,4 +123,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
-</urlset>
+<url><loc>https://moduin.kr/wealth/post-11.html</loc><lastmod>2026-11-10</lastmod></url></urlset>
