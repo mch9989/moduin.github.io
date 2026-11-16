@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[스마트팩토리] 생산 현장 POP(시점관리) 단말기 설계 원칙과 작업자 오조작 방지 실무 - moduin.kr</title>
+    <meta name="description" content="장갑을 낀 현장 작업자가 0.2초 내에 직관적으로 조작할 수 있는 산업용 터치스크린 POP UI 설계 원칙과 로컬 캐싱 기반 무지연 아키텍처.">
+    <link rel="canonical" href="https://moduin.kr/smartfactory/post-12.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background-color: #f8f9fa; color: #212529; line-height: 1.85; }
+        header { width: 100%; background: #ffffff; border-bottom: 1px solid #e9ecef; padding: 16px 24px; margin-bottom: 40px; }
+        .header-inner { max-width: 880px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { font-size: 1.25rem; font-weight: 800; color: #212529; text-decoration: none; letter-spacing: -0.5px; }
+        .header-back { font-size: 0.92rem; color: #495057; text-decoration: none; font-weight: 500; }
+        .header-back:hover { color: #6f42c1; text-decoration: underline; }
+        .article-card { max-width: 880px; margin: 0 auto 60px auto; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; padding: 48px 44px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+        .category-label { font-size: 0.9rem; font-weight: 700; color: #6f42c1; margin-bottom: 14px; display: inline-block; }
+        h1 { font-size: 2.05rem; font-weight: 800; color: #212529; line-height: 1.35; margin-bottom: 14px; letter-spacing: -0.8px; word-break: keep-all; }
+        .post-meta { font-size: 0.88rem; color: #6c757d; margin-bottom: 32px; }
+        .toc-card { background: #ffffff; border: 1px solid #e9ecef; border-left: 4px solid #6f42c1; border-radius: 4px; padding: 24px 28px; margin-bottom: 40px; }
+        .toc-title { font-size: 1.05rem; font-weight: 700; color: #212529; margin-bottom: 12px; }
+        .toc-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .toc-list li { margin-bottom: 8px; font-size: 0.95rem; }
+        .toc-list a { color: #495057; text-decoration: none; }
+        .toc-list a:hover { color: #6f42c1; text-decoration: underline; }
+        h2 { font-size: 1.45rem; font-weight: 700; color: #212529; margin: 44px 0 20px 0; display: flex; align-items: center; letter-spacing: -0.4px; word-break: keep-all; }
+        h2::before { content: ""; display: inline-block; width: 4px; height: 1.25rem; background-color: #6f42c1; margin-right: 10px; border-radius: 2px; }
+        p { margin-bottom: 20px; font-size: 1.02rem; color: #343a40; word-break: keep-all; }
+        ul { margin-bottom: 24px; padding-left: 22px; }
+        li { margin-bottom: 10px; font-size: 0.98rem; color: #495057; }
+        .summary-card { background-color: #fbfbfd; border: 1px solid #e9ecef; border-radius: 6px; padding: 18px 22px; margin-bottom: 18px; }
+        table { width: 100%; border-collapse: collapse; margin: 28px 0 36px 0; font-size: 0.95rem; }
+        th, td { border: 1px solid #dee2e6; padding: 13px 16px; text-align: left; }
+        th { background: #f8f9fa; color: #212529; font-weight: 700; width: 28%; }
+        td { background: #ffffff; color: #495057; }
+        footer { text-align: center; padding: 30px 20px 50px; font-size: 0.85rem; color: #868e96; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="../index.html" class="header-logo">moduin.kr</a>
+            <a href="../category-smartfactory.html" class="header-back">← 스마트팩토리 칼럼 목록</a>
+        </div>
+    </header>
+    <main class="article-card">
+        <span class="category-label">스마트팩토리 & 현장 단말 아키텍처</span>
+        <h1>[스마트팩토리] 생산 현장 POP(시점관리) 단말기 설계 원칙과 작업자 오조작 방지 실무</h1>
+        <div class="post-meta">작성일: 2026년 11월 16일 · 작성자: moduin · 읽는 시간: 약 7분</div>
+
+        <div class="toc-card">
+            <div class="toc-title">목차</div>
+            <ul class="toc-list">
+                <li><a href="#sec-1">1. 사무실 모니터 기준으로 만든 현장 프로그램이 외면받는 이유</a></li>
+                <li><a href="#sec-2">2. 키보드·마우스를 제거한 바코드 중심 무입력(Zero-Typing) 설계</a></li>
+                <li><a href="#sec-3">3. 0.2초 이내 응답을 보장하는 클라이언트 로컬 캐싱 구조</a></li>
+                <li><a href="#sec-4">4. 현장 작업자 오조작을 막는 하드웨어·소프트웨어 락(Lock) 기준</a></li>
+            </ul>
+        </div>
+
+        <p>스마트팩토리 구축 후 현업 관리자들이 가장 많이 호소하는 문제 중 하나는 <strong>"시스템을 다 깔아놨는데 현장 작업자들이 바코드를 안 찍고 퇴근 전에 수기로 한꺼번에 몰아서 입력한다"</strong>는 것입니다. 이 현상이 발생하면 실시간 공정 추적(Tracking)과 재공 재고(WIP) 파악은 완전히 무용지물이 됩니다.</p>
+
+        <h2 id="sec-1">1. 사무실 모니터 기준으로 만든 현장 프로그램이 외면받는 이유</h2>
+        <p>사무직 개발자가 깨끗한 사무실 책상 위에서 27인치 모니터와 마우스를 기준으로 설계한 화면은 제조 라인에서 작동하지 않습니다. 현장 작업자는 면장갑이나 코팅 장갑을 낀 채 서서 15인치 산업용 터치 패널을 조작하며, 택트 타임(Tact Time)이 10초 내외인 조립 라인에서는 화면을 2번 이상 터치할 여유조차 없습니다.</p>
+        <div class="summary-card">
+            <p><strong>현장 실패의 전형적 징후:</strong> 작은 드롭다운 콤보박스에서 품목 코드를 찾게 만들거나, 수량 입력을 위해 윈도우 화상 키보드를 띄워 숫자를 치게 만드는 순간 작업자는 해당 단말기를 '불편한 감시 도구'로 인식하고 사용을 거부합니다.</p>
+        </div>
+
+        <h2 id="sec-2">2. 키보드·마우스를 제거한 바코드 중심 무입력(Zero-Typing) 설계</h2>
+        <p>현장 POP(Point of Production) 프로그램의 궁극적인 목표는 작업자가 화면에 글자를 한 글자도 타이핑하지 않게 만드는 것입니다.</p>
+        <ul>
+            <li><strong>포커스 강제 고정(Focus Lock):</strong> POP 화면이 활성화된 상태에서는 작업자가 다른 영역을 실수로 터치하더라도 스캔 입력 버퍼가 항상 바코드 리더기 수신 대기 상태를 유지해야 합니다.</li>
+            <li><strong>접두어(Prefix) 기반 자동 분기 처리:</strong> 작업자가 "지금 자재 바코드를 찍을 차례인지, 작업지시 바코드를 찍을 차례인지" 화면 메뉴를 고르게 하지 않습니다. 바코드 자체에 <code>WO-</code>(작업지시), <code>MAT-</code>(자재롯트), <code>EMP-</code>(작업자 사번) 같은 식별 접두어를 부여해 스캐너 방아쇠만 당기면 엔진이 맥락을 자동 판별해 다음 스텝으로 넘어가야 합니다.</li>
+        </ul>
+
+        <h2 id="sec-3">3. 0.2초 이내 응답을 보장하는 클라이언트 로컬 캐싱 구조</h2>
+        <p>바코드 스캔 후 '삐빅' 소리와 동시에 화면이 전환되지 않고 1.5초만 버벅거려도 작업자는 바코드가 안 찍힌 줄 알고 두 번, 세 번 연속 스캔을 시도합니다.</p>
+        <ul>
+            <li><strong>기준정보 메모리 상주:</strong> 품목 마스터, 불량 코드, 공정 라우팅 같은 정적 기준정보는 단말기 부팅 시 로컬 메모리(또는 SQLite)에 캐싱하여 DB 왕복 지연 없이 0.05초 만에 검증을 끝냅니다.</li>
+            <li><strong>명확한 청각·시각 피드백:</strong> 정상 스캔 시에는 녹색 점멸과 경쾌한 단일 비프음을, 불일치(이종 자재 투입 등) 시에는 붉은색 전체 화면 경고창과 함께 경고 부저가 울리도록 시청각 피드백을 극대화해야 합니다.</li>
+        </ul>
+
+        <h2 id="sec-4">4. 현장 작업자 오조작을 막는 UI 설계 규격</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>UI/UX 항목</th>
+                    <th>현장 산업용 터치 패널 표준</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>최소 버튼 규격</td>
+                    <td>장갑 착용 터치를 고려해 가로·세로 최소 <code>64px × 64px</code> 이상, 버튼 간 여백 12px 확보</td>
+                </tr>
+                <tr>
+                    <td>불량 수량 등록</td>
+                    <td>숫자 키패드 입력 대신 [외관불량 +1], [치수불량 +1] 형태의 원터치 카운터 버튼 배치</td>
+                </tr>
+                <tr>
+                    <td>실수 취소 기능</td>
+                    <td>직전 스캔 1건을 즉시 되돌릴 수 있는 '직전 취소(Undo)' 대형 버튼 상시 배치</td>
+                </tr>
+                <tr>
+                    <td>배색 및 대비</td>
+                    <td>조명이 어둡거나 반사광이 강한 공장 환경을 고려한 고대비(High-Contrast) 배색 적용</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>현장 POP 시스템의 성패는 화려한 그래프가 아니라 <strong>작업자의 동선을 단 1초도 방해하지 않으면서 자연스럽게 데이터가 수집되도록 만드는 인체공학적 소프트웨어 설계</strong>에 달려 있습니다.</p>
+    </main>
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
