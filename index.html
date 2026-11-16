@@ -62,7 +62,7 @@
             text-align: center;
         }
 
-        /* 대표 대문 이미지 (임시 자르기 코드 제거 및 온전한 비율 유지) */
+        /* 대표 대문 이미지 */
         .hero-image {
             width: 100%;
             max-height: 520px;
@@ -108,9 +108,9 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.12);
         }
         
-        .btn-subscribe { background-color: #d35400; } /* 뉴스레터 구독 */
-        .btn-request { background-color: #27ae60; }   /* 작업 의뢰 */
-        .btn-guestbook { background-color: #2980b9; } /* 방명록/댓글 */
+        .btn-subscribe { background-color: #d35400; }
+        .btn-request { background-color: #27ae60; }
+        .btn-guestbook { background-color: #2980b9; }
 
         /* 기술 칼럼 글 목록 섹션 */
         .content-section {
@@ -228,7 +228,7 @@
             당신의 시간을 아껴주는 기술을 공유합니다.
         </p>
 
-        <!-- 소통 액션 버튼 (연동 완료 주소 유지) -->
+        <!-- 소통 액션 버튼 -->
         <div class="action-buttons">
             <a href="https://page.stibee.com/subscriptions/528437" target="_blank" class="btn btn-subscribe">뉴스레터 구독하기</a>
             <a href="https://forms.gle/5Gk1uLgRWsm7SWMm9" target="_blank" class="btn btn-request">작업 의뢰 / 문의</a>
@@ -250,7 +250,53 @@
         <!-- 기술 칼럼 포스팅 영역 (최신순 역순 정렬) -->
         <div class="content-section" id="tech-list">
             <h2 class="section-title">기술 및 개발 칼럼 (최신순)</h2>
-            <div class="post-list"><a class="post-card" href="/automation/post-08.html"><span class="post-tag">AI·업무자동화</span><h3>[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계</h3><span class="post-date">2026. 11. 10</span></a><a class="post-card" href="/wealth/post-11.html"><span class="post-tag">자산관리·투자</span><h3>[국장 시황/2026.11.10] 변동성 장세 속 외인·기관 수급 양극화와 지지선 점검</h3><span class="post-date">2026. 11. 10</span></a><a class="post-card" href="/smartfactory/post-09.html"><span class="post-tag">스마트팩토리</span><h3>[스마트팩토리] 중소 제조현장 레거시 PLC 연동을 위한 경량 엣지 데이터 브로커 설계</h3><span class="post-date">2026. 11. 09</span></a><a class="post-card" href="/wealth/post-10.html"><span class="post-tag">자산관리·투자</span><h3>2026년 11월 09일 국장 흐름 요약</h3><span class="post-date">2026. 11. 09</span></a>
+            <div class="post-list">
+
+                <!-- 14번 포스트 (2026. 11. 16) -->
+                <a href="smartfactory/post-14.html" class="post-card">
+                    <span class="post-tag">스마트팩토리 &amp; 설비 데이터 분석</span>
+                    <h3>[스마트팩토리] PLC 신호 기반 설비 종합효율(OEE) 자동 산출과 진성 비가동 분류 실무</h3>
+                    <p>작업자 수기 일지에 의존하던 가동률 통계를 배제하고, PLC 가동 접점과 사이클 타임 분석으로 설비 종합효율(OEE)과 순간 정지(Chokotei)를 자동 포착하는 구현 기준.</p>
+                    <span class="post-date">2026. 11. 16 · 읽는 시간 8분</span>
+                </a>
+
+                <!-- 13번 포스트 (2026. 11. 16) -->
+                <a href="smartfactory/post-13.html" class="post-card">
+                    <span class="post-tag">스마트팩토리 &amp; 품질 추적성</span>
+                    <h3>[스마트팩토리] 바코드·RFID 기반 공정 풀프루프(Fool-Proof)와 이종 자재 혼입 차단 설계</h3>
+                    <p>작업자의 단순 실수로 발생하는 이종 자재 투입, 전 공정 누락, 선입선출(FIFO) 위반을 시스템 인터락으로 원천 차단하는 제조 현장 풀프루프 아키텍처.</p>
+                    <span class="post-date">2026. 11. 16 · 읽는 시간 8분</span>
+                </a>
+
+                <!-- 12번 포스트 (2026. 11. 16) -->
+                <a href="smartfactory/post-12.html" class="post-card">
+                    <span class="post-tag">스마트팩토리 &amp; 현장 단말 아키텍처</span>
+                    <h3>[스마트팩토리] 생산 현장 POP(시점관리) 단말기 설계 원칙과 작업자 오조작 방지 실무</h3>
+                    <p>장갑을 낀 현장 작업자가 0.2초 내에 직관적으로 조작할 수 있는 산업용 터치스크린 POP UI 설계 원칙과 로컬 캐싱 기반 무지연 아키텍처.</p>
+                    <span class="post-date">2026. 11. 16 · 읽는 시간 7분</span>
+                </a>
+
+                <!-- 11번 포스트 (2026. 11. 16) -->
+                <a href="smartfactory/post-11.html" class="post-card">
+                    <span class="post-tag">스마트팩토리 &amp; 제조 IT 아키텍처</span>
+                    <h3>[스마트팩토리] ERP와 MES 간 실시간 인터페이스(I/F) 설계 및 데이터 불일치 방지 전략</h3>
+                    <p>제조 현장에서 ERP 재고와 MES 생산 실적이 어긋나는 원인을 분석하고, 스테이징 테이블 기반 비동기 큐와 재처리(Retry) 아키텍처 설계 실무를 다룬다.</p>
+                    <span class="post-date">2026. 11. 16 · 읽는 시간 8분</span>
+                </a>
+
+                <!-- 10번 포스트 (2026. 11. 16) -->
+                <a href="smartfactory/post-10.html" class="post-card">
+                    <span class="post-tag">스마트팩토리 &amp; 제조 IT 아키텍처</span>
+                    <h3>[스마트팩토리] 제조 현장 MES 데이터베이스 데드락(Deadlock) 원인과 인덱싱 튜닝 실무</h3>
+                    <p>생산 실적 집계와 설비 실시간 로그가 충돌하는 제조 현장 MES DB(MS-SQL)의 교착상태(Deadlock) 발생 메커니즘과 격리 수준 및 인덱스 설계 개선 실무.</p>
+                    <span class="post-date">2026. 11. 16 · 읽는 시간 8분</span>
+                </a>
+
+                <!-- 기존 최신 글 목록 -->
+                <a class="post-card" href="automation/post-08.html"><span class="post-tag">AI·업무자동화</span><h3>[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계</h3><span class="post-date">2026. 11. 10</span></a>
+                <a class="post-card" href="wealth/post-11.html"><span class="post-tag">자산관리·투자</span><h3>[국장 시황/2026.11.10] 변동성 장세 속 외인·기관 수급 양극화와 지지선 점검</h3><span class="post-date">2026. 11. 10</span></a>
+                <a class="post-card" href="smartfactory/post-09.html"><span class="post-tag">스마트팩토리</span><h3>[스마트팩토리] 중소 제조현장 레거시 PLC 연동을 위한 경량 엣지 데이터 브로커 설계</h3><span class="post-date">2026. 11. 09</span></a>
+                <a class="post-card" href="wealth/post-10.html"><span class="post-tag">자산관리·투자</span><h3>2026년 11월 09일 국장 흐름 요약</h3><span class="post-date">2026. 11. 09</span></a>
 
                 <!-- 9번 포스트 (2026. 11. 09) -->
                 <a href="wealth/post-09.html" class="post-card">
@@ -336,7 +382,5 @@
             <a href="https://github.com/mch9989/moduin.github.io/discussions" target="_blank">문의 및 기술 피드백</a>
         </p>
     </footer>
-
-
 
 </body></html>
