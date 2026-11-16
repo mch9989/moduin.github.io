@@ -190,10 +190,17 @@
 <body>
 
     <!-- 헤더: moduin.kr & 자산관리 칼럼 목록 단일 링크 -->
-    <header>
-        <div class="header-inner">
+    <<header>
+        <div class="header-inner" style="flex-wrap: wrap; gap: 12px;">
             <a href="../index.html" class="header-logo">moduin.kr</a>
-            <a href="../category-wealth.html" class="header-back">← 자산관리 칼럼 목록</a>
+            <nav style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <a href="../about.html" class="header-back">소개</a>
+                <a href="../category-automation.html" class="header-back">AI·업무자동화</a>
+                <a href="../category-smartfactory.html" class="header-back">스마트팩토리</a>
+                <a href="../category-wealth.html" class="header-back">자산관리·투자</a>
+                <a href="../tools/stock-uploader.html" class="header-back" style="color:#d35400; font-weight:700;">배포 도구</a>
+                <a href="../privacy.html" class="header-back">개인정보처리방침</a>
+            </nav>
         </div>
     </header>
 
@@ -274,4 +281,23 @@
         </table>
 
         <h2 id="sec-4">4. 단기 트레이딩 및 스윙 관점의 리스크 관리 전략</h2>
-        <p>지수가 뚜렷한 추세를 형성하기 전까지 무리한 비중 확대나 막연한 낙폭 과대 매수는 손실폭
+        <p>지수가 뚜렷한 추세를 형성하기 전까지 무리한 비중 확대나 막연한 낙폭 과대 매수는 손실폭을 키우기 쉽습니다. 다음 세 가지 원칙을 중심으로 대응 포트폴리오를 유지해야 합니다.</p>
+        <ul>
+            <li><strong>현금 비중 30% 이상 유지:</strong> 지수 하락 시 기계적으로 분할 매수할 수 있는 실탄이 없으면 변동성 구간에서 심리적으로 쫓기게 됩니다.</li>
+            <li><strong>실적 확인 없는 테마주 추격 매수 금지:</strong> 수급 연속성이 없는 단기 찌라시 및 테마 종목은 당일 청산 원칙을 준수해야 합니다.</li>
+            <li><strong>주요 지지선 이탈 시 기계적 손절(Loss-Cut):</strong> 기술적 지지선 하향 이탈 시 막연한 반등 기대감을 배제하고 비중 축소 후 현금을 확보해야 합니다.</li>
+        </ul>
+
+        <div style="margin-top: 48px; padding: 24px 26px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-left: 4px solid #2c3e50; border-radius: 6px;">
+            <div style="font-size: 1rem; font-weight: 800; color: #212529; margin-bottom: 6px;">작성자: moduin (제조 IT · 스마트팩토리 시스템 아키텍트)</div>
+            <p style="font-size: 0.92rem; color: #495057; margin-bottom: 0; line-height: 1.7;">20년 이상 제조 현장 MES, PLC 설비 인터페이스, C#/.NET 기반 무인 업무 자동화 파이프라인 및 퀀트 데이터 분석 시스템을 설계·구축해 온 현업 소프트웨어 엔지니어입니다. 실무에서 검증된 아키텍처와 트러블슈팅 경험을 기록합니다.</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 moduin.kr &amp; PlatformWorks. All Rights Reserved.</p>
+        <p style="margin-top: 8px;"><a href="../privacy.html" style="color:#555; text-decoration:none; font-weight:600;">개인정보처리방침</a> | <a href="../index.html" style="color:#555; text-decoration:none; font-weight:600;">메인으로 이동</a></p>
+    </footer>
+
+</body>
+</html>
