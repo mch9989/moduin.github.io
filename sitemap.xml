@@ -1,63 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://moduin.kr/</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/index.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/about.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/privacy.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/tools/stock-uploader.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <!-- 메인 대문 및 고정 페이지 -->
+  <url><loc>https://moduin.kr/</loc><lastmod>2026-11-16</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://moduin.kr/index.html</loc><lastmod>2026-11-16</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://moduin.kr/about.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://moduin.kr/privacy.html</loc><lastmod>2026-11-16</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://moduin.kr/tools/stock-uploader.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 
-  <!-- 카테고리 메인 -->
-  <url>
-    <loc>https://moduin.kr/category-automation.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/category-smartfactory.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://moduin.kr/category-wealth.html</loc>
-    <lastmod>2026-11-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
+  <!-- 카테고리 인덱스 3종 -->
+  <url><loc>https://moduin.kr/category-automation.html</loc><lastmod>2026-11-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/category-smartfactory.html</loc><lastmod>2026-11-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/category-wealth.html</loc><lastmod>2026-11-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 
-  <!-- AI·업무자동화 -->
+  <!-- 1. AI·업무자동화 (총 7편) -->
   <url><loc>https://moduin.kr/automation/post-01.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/automation/post-05.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/automation/post-07.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/automation/post-08.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/automation/post-09.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/automation/post-10.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/automation/post-11.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
-  <!-- 스마트팩토리 (총 9편) -->
+  <!-- 2. 스마트팩토리 (총 9편) -->
   <url><loc>https://moduin.kr/smartfactory/post-02.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/smartfactory/post-04.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/smartfactory/post-08.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -68,10 +32,13 @@
   <url><loc>https://moduin.kr/smartfactory/post-13.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/smartfactory/post-14.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
-  <!-- 자산관리·투자 -->
+  <!-- 3. 자산관리·투자 (총 8편) -->
   <url><loc>https://moduin.kr/wealth/post-03.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/wealth/post-06.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/wealth/post-09.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/wealth/post-10.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://moduin.kr/wealth/post-11.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/wealth/post-12.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/wealth/post-13.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://moduin.kr/wealth/post-14.html</loc><lastmod>2026-11-16</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>
