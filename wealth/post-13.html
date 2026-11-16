@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[자산관리·리스크] 단일 자산 몰빵을 막는 ATR 기반 변동성 역가중 포지션 사이징 설계 - moduin.kr</title>
+    <meta name="description" content="종목별 가격 변동폭(ATR)이 다른 포트폴리오에서 모든 종목에 동일한 금액을 배분할 때 발생하는 리스크 편중을 제거하고, 계좌 전체 손실 한도를 고정하는 포지션 사이징 방법론.">
+    <link rel="canonical" href="https://moduin.kr/wealth/post-13.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background-color: #f8f9fa; color: #212529; line-height: 1.85; }
+        header { width: 100%; background: #ffffff; border-bottom: 1px solid #e9ecef; padding: 16px 24px; margin-bottom: 40px; }
+        .header-inner { max-width: 880px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { font-size: 1.25rem; font-weight: 800; color: #212529; text-decoration: none; letter-spacing: -0.5px; }
+        .header-back { font-size: 0.92rem; color: #495057; text-decoration: none; font-weight: 500; }
+        .header-back:hover { color: #6f42c1; text-decoration: underline; }
+        .article-card { max-width: 880px; margin: 0 auto 60px auto; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; padding: 48px 44px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+        .category-label { font-size: 0.9rem; font-weight: 700; color: #6f42c1; margin-bottom: 14px; display: inline-block; }
+        h1 { font-size: 2.05rem; font-weight: 800; color: #212529; line-height: 1.35; margin-bottom: 14px; letter-spacing: -0.8px; word-break: keep-all; }
+        .post-meta { font-size: 0.88rem; color: #6c757d; margin-bottom: 32px; }
+        .disclaimer-box { background-color: #fff; border: 1px solid #f5c6cb; border-radius: 6px; padding: 20px 24px; margin-bottom: 36px; color: #721c24; font-size: 0.93rem; line-height: 1.7; }
+        .disclaimer-title { font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .disclaimer-box p { margin-bottom: 6px; color: #721c24; font-size: 0.93rem; }
+        .disclaimer-box p:last-child { margin-bottom: 0; }
+        .toc-card { background: #ffffff; border: 1px solid #e9ecef; border-left: 4px solid #6f42c1; border-radius: 4px; padding: 24px 28px; margin-bottom: 40px; }
+        .toc-title { font-size: 1.05rem; font-weight: 700; color: #212529; margin-bottom: 12px; }
+        .toc-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .toc-list li { margin-bottom: 8px; font-size: 0.95rem; }
+        .toc-list a { color: #495057; text-decoration: none; }
+        .toc-list a:hover { color: #6f42c1; text-decoration: underline; }
+        h2 { font-size: 1.45rem; font-weight: 700; color: #212529; margin: 44px 0 20px 0; display: flex; align-items: center; letter-spacing: -0.4px; word-break: keep-all; }
+        h2::before { content: ""; display: inline-block; width: 4px; height: 1.25rem; background-color: #6f42c1; margin-right: 10px; border-radius: 2px; }
+        p { margin-bottom: 20px; font-size: 1.02rem; color: #343a40; word-break: keep-all; }
+        ul { margin-bottom: 24px; padding-left: 22px; }
+        li { margin-bottom: 10px; font-size: 0.98rem; color: #495057; }
+        .summary-card { background-color: #fbfbfd; border: 1px solid #e9ecef; border-radius: 6px; padding: 18px 22px; margin-bottom: 18px; }
+        table { width: 100%; border-collapse: collapse; margin: 28px 0 36px 0; font-size: 0.95rem; }
+        th, td { border: 1px solid #dee2e6; padding: 13px 16px; text-align: left; }
+        th { background: #f8f9fa; color: #212529; font-weight: 700; width: 28%; }
+        td { background: #ffffff; color: #495057; }
+        footer { text-align: center; padding: 30px 20px 50px; font-size: 0.85rem; color: #868e96; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="../index.html" class="header-logo">moduin.kr</a>
+            <a href="../category-wealth.html" class="header-back">← 자산관리 칼럼 목록</a>
+        </div>
+    </header>
+    <main class="article-card">
+        <span class="category-label">자산관리 &amp; 리스크 엔지니어링</span>
+        <h1>[자산관리·리스크] 단일 자산 몰빵을 막는 ATR 기반 변동성 역가중 포지션 사이징 설계</h1>
+        <div class="post-meta">작성일: 2026년 11월 16일 · 작성자: moduin · 읽는 시간: 약 7분</div>
+
+        <div class="disclaimer-box">
+            <div class="disclaimer-title">⚠️ [필독] 법적 고지 및 투자 유의사항 (Disclaimer)</div>
+            <p>본 칼럼은 포트폴리오 리스크 배분과 자금 관리(Money Management) 수리 모델을 설명하는 교육적 아티클입니다.</p>
+            <p><strong>특정 금융투자상품의 매수·매도를 권유하거나 개별 종목에 대한 투자 자문 및 조언을 제공하지 않습니다.</strong></p>
+            <p>모든 투자의 의사결정과 손익 책임은 전적으로 투자자 본인에게 귀속됩니다.</p>
+        </div>
+
+        <div class="toc-card">
+            <div class="toc-title">목차</div>
+            <ul class="toc-list">
+                <li><a href="#sec-1">1. 균등 금액 배분(1/N)이 실제로는 리스크 불균형을 초래하는 이유</a></li>
+                <li><a href="#sec-2">2. ATR(Average True Range)을 활용한 종목별 진성 변동폭 측정</a></li>
+                <li><a href="#sec-3">3. 총자산 1% 손실 한도 고정(Fixed Fractional) 수량 산출 공식</a></li>
+                <li><a href="#sec-4">4. 변동성 역가중 배분 시뮬레이션 비교표</a></li>
+            </ul>
+        </div>
+
+        <p>대부분의 개인 투자자는 "어떤 종목을 살 것인가(진입 타점)"에 에너지의 90%를 쏟고, "얼마만큼의 수량을 살 것인가(포지션 사이징)"는 감에 의존합니다. 하지만 계좌의 장기 생존과 최대낙폭(MDD)을 결정짓는 핵심 변수는 진입 타이밍이 아니라 <strong>자금 배분 알고리즘</strong>입니다.</p>
+
+        <h2 id="sec-1">1. 균등 금액 배분(1/N)이 실제로는 리스크 불균형을 초래하는 이유</h2>
+        <p>1억 원의 자산을 5개 종목에 똑같이 2,000만 원씩 나누어 담았다고 해서 리스크가 20%씩 균등하게 분산된 것이 아닙니다. 하루 등락폭이 1% 내외인 대형 배당주 2,000만 원과, 하루에 7~8%씩 출렁이는 고변동성 성장주 2,000만 원은 계좌 전체 손익에 미치는 충격량이 7배 이상 차이 납니다.</p>
+
+        <h2 id="sec-2">2. ATR(Average True Range)을 활용한 종목별 진성 변동폭 측정</h2>
+        <p>종목마다 다른 고유 변동성을 동일한 척도로 정규화하기 위해 웰스 와일더(Welles Wilder)가 고안한 <strong>ATR(평균 진정 범위)</strong> 지표를 사용합니다. ATR은 단순 고가-저가 차이뿐만 아니라 전일 종가 대비 갭 상승·갭 하락 폭까지 반영한 최근 14일 또는 20일간의 평균 일일 변동 금액입니다.</p>
+
+        <h2 id="sec-3">3. 총자산 1% 손실 한도 고정(Fixed Fractional) 수량 산출 공식</h2>
+        <p>터틀 트레이딩을 비롯한 기관 리스크 관리 모델에서는 개별 포지션이 손절가에 도달했을 때 계좌 전체 원금에서 잃게 되는 최대 금액을 <strong>총자산의 1% 이내</strong>로 엄격히 통제합니다.</p>
+        <div class="summary-card">
+            <p><strong>매수 수량 산출 공식:</strong><br>
+            <code>매수 수량 = (총 운용 자산 × 허용 리스크 비율 0.01) ÷ (2 × ATR_20)</code><br>
+            즉, 최근 20일 평균 변동폭의 2배(<code>2 ATR</code>)만큼 역행하여 손절이 나가더라도 계좌 전체 자산의 1%만 감소하도록 진입 수량을 역산해 결정합니다.</p>
+        </div>
+
+        <h2 id="sec-4">4. 변동성 역가중 배분 시뮬레이션 비교표 (총자산 1억 원, 허용 리스크 100만 원 기준)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>구분</th>
+                    <th>A 종목 (저변동성 대형주)</th>
+                    <th>B 종목 (고변동성 테마주)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>현재 주가</td>
+                    <td>50,000원</td>
+                    <td>50,000원</td>
+                </tr>
+                <tr>
+                    <td>20일 평균 변동폭 (ATR)</td>
+                    <td>1,000원 (일평균 2%)</td>
+                    <td>4,000원 (일평균 8%)</td>
+                </tr>
+                <tr>
+                    <td>손절 허용 폭 (2 ATR)</td>
+                    <td>2,000원 (48,000원 이탈 시)</td>
+                    <td>8,000원 (42,000원 이탈 시)</td>
+                </tr>
+                <tr>
+                    <td>산출 매수 수량</td>
+                    <td><strong>500주 (투입금 2,500만 원)</strong></td>
+                    <td><strong>125주 (투입금 625만 원)</strong></td>
+                </tr>
+                <tr>
+                    <td>손절 시 계좌 손실액</td>
+                    <td>동일하게 100만 원 (-1.0%)</td>
+                    <td>동일하게 100만 원 (-1.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>이처럼 변동성이 큰 자산일수록 투입 비중을 자동으로 줄이고, 변동성이 안정적인 자산에 비중을 실어주는 역가중 모델을 적용하면 예기치 못한 급락장에서도 계좌 전체가 치명상을 입는 현상을 구조적으로 방어할 수 있습니다.</p>
+    </main>
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
