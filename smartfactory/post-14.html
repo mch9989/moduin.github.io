@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[스마트팩토리] PLC 신호 기반 설비 종합효율(OEE) 자동 산출과 진성 비가동 분류 실무 - moduin.kr</title>
+    <meta name="description" content="작업자 수기 일지에 의존하던 가동률 통계를 배제하고, PLC 가동 접점과 사이클 타임 분석으로 설비 종합효율(OEE)과 순간 정지(Chokotei)를 자동 포착하는 구현 기준.">
+    <link rel="canonical" href="https://moduin.kr/smartfactory/post-14.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background-color: #f8f9fa; color: #212529; line-height: 1.85; }
+        header { width: 100%; background: #ffffff; border-bottom: 1px solid #e9ecef; padding: 16px 24px; margin-bottom: 40px; }
+        .header-inner { max-width: 880px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { font-size: 1.25rem; font-weight: 800; color: #212529; text-decoration: none; letter-spacing: -0.5px; }
+        .header-back { font-size: 0.92rem; color: #495057; text-decoration: none; font-weight: 500; }
+        .header-back:hover { color: #6f42c1; text-decoration: underline; }
+        .article-card { max-width: 880px; margin: 0 auto 60px auto; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; padding: 48px 44px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+        .category-label { font-size: 0.9rem; font-weight: 700; color: #6f42c1; margin-bottom: 14px; display: inline-block; }
+        h1 { font-size: 2.05rem; font-weight: 800; color: #212529; line-height: 1.35; margin-bottom: 14px; letter-spacing: -0.8px; word-break: keep-all; }
+        .post-meta { font-size: 0.88rem; color: #6c757d; margin-bottom: 32px; }
+        .toc-card { background: #ffffff; border: 1px solid #e9ecef; border-left: 4px solid #6f42c1; border-radius: 4px; padding: 24px 28px; margin-bottom: 40px; }
+        .toc-title { font-size: 1.05rem; font-weight: 700; color: #212529; margin-bottom: 12px; }
+        .toc-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .toc-list li { margin-bottom: 8px; font-size: 0.95rem; }
+        .toc-list a { color: #495057; text-decoration: none; }
+        .toc-list a:hover { color: #6f42c1; text-decoration: underline; }
+        h2 { font-size: 1.45rem; font-weight: 700; color: #212529; margin: 44px 0 20px 0; display: flex; align-items: center; letter-spacing: -0.4px; word-break: keep-all; }
+        h2::before { content: ""; display: inline-block; width: 4px; height: 1.25rem; background-color: #6f42c1; margin-right: 10px; border-radius: 2px; }
+        p { margin-bottom: 20px; font-size: 1.02rem; color: #343a40; word-break: keep-all; }
+        ul { margin-bottom: 24px; padding-left: 22px; }
+        li { margin-bottom: 10px; font-size: 0.98rem; color: #495057; }
+        .summary-card { background-color: #fbfbfd; border: 1px solid #e9ecef; border-radius: 6px; padding: 18px 22px; margin-bottom: 18px; }
+        table { width: 100%; border-collapse: collapse; margin: 28px 0 36px 0; font-size: 0.95rem; }
+        th, td { border: 1px solid #dee2e6; padding: 13px 16px; text-align: left; }
+        th { background: #f8f9fa; color: #212529; font-weight: 700; width: 28%; }
+        td { background: #ffffff; color: #495057; }
+        footer { text-align: center; padding: 30px 20px 50px; font-size: 0.85rem; color: #868e96; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="../index.html" class="header-logo">moduin.kr</a>
+            <a href="../category-smartfactory.html" class="header-back">← 스마트팩토리 칼럼 목록</a>
+        </div>
+    </header>
+    <main class="article-card">
+        <span class="category-label">스마트팩토리 & 설비 데이터 분석</span>
+        <h1>[스마트팩토리] PLC 신호 기반 설비 종합효율(OEE) 자동 산출과 진성 비가동 분류 실무</h1>
+        <div class="post-meta">작성일: 2026년 11월 16일 · 작성자: moduin · 읽는 시간: 약 8분</div>
+
+        <div class="toc-card">
+            <div class="toc-title">목차</div>
+            <ul class="toc-list">
+                <li><a href="#sec-1">1. 수기 작업일보의 '가동률 95%'가 허상인 이유</a></li>
+                <li><a href="#sec-2">2. OEE 3대 지표(시간가동률·성능가동률·양품률) 자동 산출 로직</a></li>
+                <li><a href="#sec-3">3. 순간 정지(Chokotei)와 계획 비가동의 자동 상태 전이 설계</a></li>
+                <li><a href="#sec-4">4. 현업 설비 모니터링 데이터 집계 기준표</a></li>
+            </ul>
+        </div>
+
+        <p>제조 현장에서 설비 증설 투자를 검토할 때 경영진이 가장 먼저 확인하는 지표는 현재 설비의 가동률입니다. 하지만 작업자가 퇴근 전 수기로 작성한 작업일보에는 늘 '가동률 92~95%'가 찍혀 있는 반면, 실제 생산 출하량은 목표치의 70% 수준에 머무르는 괴리가 빈번히 발생합니다.</p>
+
+        <h2 id="sec-1">1. 수기 작업일보의 '가동률 95%'가 허상인 이유</h2>
+        <p>작업자는 설비가 고장 나서 30분 이상 멈춘 대형 비가동만 일지에 기록합니다. 자재 걸림으로 40초 멈췄다 재가동하는 <strong>순간 정지(Chokotei)</strong>, 금형 교체 지연, 또는 설비가 공회전(Idle) 상태로 돌아가며 표준 사이클 타임보다 20% 느리게 생산되는 속도 저하 손실은 수기 일지에 전혀 잡히지 않기 때문입니다.</p>
+
+        <h2 id="sec-2">2. OEE 3대 지표(시간가동률·성능가동률·양품률) 자동 산출 로직</h2>
+        <p>설비의 진짜 생산성을 왜곡 없이 측정하려면 PLC에서 올라오는 <strong>가동 상태 접점(Run/Stop/Alarm)</strong>과 <strong>제품 카운트 펄스(Shot/Cycle Pulse)</strong>를 기반으로 설비 종합효율(OEE)을 자동 계산해야 합니다.</p>
+        <div class="summary-card">
+            <p><strong>OEE = 시간가동률 × 성능가동률 × 양품률</strong><br>
+            ① <strong>시간가동률:</strong> 부하시간(조업시간 - 계획정지) 대비 실제 설비가 돌아간 가동시간 비율<br>
+            ② <strong>성능가동률:</strong> 가동시간 동안 이론상 생산해야 할 기준 수량(표준 C/T 기준) 대비 실제 생산 수량 비율<br>
+            ③ <strong>양품률:</strong> 총 생산 수량 대비 불량을 제외한 순수 양품 수량 비율</p>
+        </div>
+
+        <h2 id="sec-3">3. 순간 정지(Chokotei)와 계획 비가동의 자동 상태 전이 설계</h2>
+        <p>PLC 신호만으로 비가동을 자동 분류할 때는 상태 전이 타이머(Debounce Timer) 로직이 핵심입니다.</p>
+        <ul>
+            <li><strong>계획 비가동 자동 마스킹:</strong> 점심시간, 교대 시간, 정기 예방보전(PM) 스케줄은 기준정보 캘린더와 연동하여 설비가 멈춰 있더라도 자동으로 '계획 정지'로 분류해 작업자가 일일이 사유를 입력하는 번거로움을 없앱니다.</li>
+            <li><strong>순간 정지 vs 고장 비가동 임계치 분리:</strong> 설비 정지 신호 발생 후 3분(180초) 이내에 재가동되면 별도 팝업 없이 '순간 정지' 카운트와 누적 시간만 자동 적산하고, 3분을 초과해 멈춰 있을 때만 현장 POP 단말기에 비가동 사유 선택 팝업을 강제 호출합니다.</li>
+        </ul>
+
+        <h2 id="sec-4">4. 현업 설비 모니터링 데이터 집계 기준표</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>측정 요소</th>
+                    <th>PLC 수집 데이터 및 연산 기준</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>실가동 시간</td>
+                    <td>PLC 자동 운전(Auto-Run) 비트 On 구간의 초 단위 누적 합계</td>
+                </tr>
+                <tr>
+                    <td>표준 사이클 타임</td>
+                    <td>품목-설비별 마스터에 등록된 이론 사이클 타임(예: 1개당 4.5초)</td>
+                </tr>
+                <tr>
+                    <td>공회전(Idle) 감지</td>
+                    <td>Run 신호는 On 상태이나 제품 카운트 펄스가 표준 C/T의 3배 이상 입력되지 않는 구간 분리</td>
+                </tr>
+                <tr>
+                    <td>설비 알람 매핑</td>
+                    <td>PLC 알람 워드(Word) 번지 값을 읽어 <code>[알람코드 마스터]</code>와 자동 매칭하여 원인 자동 기록</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>수기 데이터를 걷어내고 PLC 펄스 기반의 OEE 산출 체계를 구축하면, <strong>"설비를 한 대 더 살 것인가, 아니면 현재 라인의 순간 정지와 속도 저하 15%만 잡아도 증설 없이 목표 물량을 뽑아낼 수 있는가"</strong>에 대한 명확한 데이터 기반 의사결정이 가능해집니다.</p>
+    </main>
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
