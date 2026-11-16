@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[거시·데이터] ECOS·FRED 오픈 API를 활용한 금리·환율·유동성 시계열 DB 자동 구축기 - moduin.kr</title>
+    <meta name="description" content="한국은행 경제통계시스템(ECOS)과 미국 세인트루이스 연준(FRED) API를 연동해 장단기 금리차, 원달러 환율, M2 통화량을 매일 자동 수집·정규화하는 데이터 파이프라인.">
+    <link rel="canonical" href="https://moduin.kr/wealth/post-14.html" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background-color: #f8f9fa; color: #212529; line-height: 1.85; }
+        header { width: 100%; background: #ffffff; border-bottom: 1px solid #e9ecef; padding: 16px 24px; margin-bottom: 40px; }
+        .header-inner { max-width: 880px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { font-size: 1.25rem; font-weight: 800; color: #212529; text-decoration: none; letter-spacing: -0.5px; }
+        .header-back { font-size: 0.92rem; color: #495057; text-decoration: none; font-weight: 500; }
+        .header-back:hover { color: #6f42c1; text-decoration: underline; }
+        .article-card { max-width: 880px; margin: 0 auto 60px auto; background: #ffffff; border: 1px solid #e9ecef; border-radius: 8px; padding: 48px 44px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+        .category-label { font-size: 0.9rem; font-weight: 700; color: #6f42c1; margin-bottom: 14px; display: inline-block; }
+        h1 { font-size: 2.05rem; font-weight: 800; color: #212529; line-height: 1.35; margin-bottom: 14px; letter-spacing: -0.8px; word-break: keep-all; }
+        .post-meta { font-size: 0.88rem; color: #6c757d; margin-bottom: 32px; }
+        .disclaimer-box { background-color: #fff; border: 1px solid #f5c6cb; border-radius: 6px; padding: 20px 24px; margin-bottom: 36px; color: #721c24; font-size: 0.93rem; line-height: 1.7; }
+        .disclaimer-title { font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .disclaimer-box p { margin-bottom: 6px; color: #721c24; font-size: 0.93rem; }
+        .disclaimer-box p:last-child { margin-bottom: 0; }
+        .toc-card { background: #ffffff; border: 1px solid #e9ecef; border-left: 4px solid #6f42c1; border-radius: 4px; padding: 24px 28px; margin-bottom: 40px; }
+        .toc-title { font-size: 1.05rem; font-weight: 700; color: #212529; margin-bottom: 12px; }
+        .toc-list { list-style: none; padding-left: 0; margin-bottom: 0; }
+        .toc-list li { margin-bottom: 8px; font-size: 0.95rem; }
+        .toc-list a { color: #495057; text-decoration: none; }
+        .toc-list a:hover { color: #6f42c1; text-decoration: underline; }
+        h2 { font-size: 1.45rem; font-weight: 700; color: #212529; margin: 44px 0 20px 0; display: flex; align-items: center; letter-spacing: -0.4px; word-break: keep-all; }
+        h2::before { content: ""; display: inline-block; width: 4px; height: 1.25rem; background-color: #6f42c1; margin-right: 10px; border-radius: 2px; }
+        p { margin-bottom: 20px; font-size: 1.02rem; color: #343a40; word-break: keep-all; }
+        ul { margin-bottom: 24px; padding-left: 22px; }
+        li { margin-bottom: 10px; font-size: 0.98rem; color: #495057; }
+        .summary-card { background-color: #fbfbfd; border: 1px solid #e9ecef; border-radius: 6px; padding: 18px 22px; margin-bottom: 18px; }
+        table { width: 100%; border-collapse: collapse; margin: 28px 0 36px 0; font-size: 0.95rem; }
+        th, td { border: 1px solid #dee2e6; padding: 13px 16px; text-align: left; }
+        th { background: #f8f9fa; color: #212529; font-weight: 700; width: 28%; }
+        td { background: #ffffff; color: #495057; }
+        footer { text-align: center; padding: 30px 20px 50px; font-size: 0.85rem; color: #868e96; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="../index.html" class="header-logo">moduin.kr</a>
+            <a href="../category-wealth.html" class="header-back">← 자산관리 칼럼 목록</a>
+        </div>
+    </header>
+    <main class="article-card">
+        <span class="category-label">자산관리 &amp; 거시 데이터 파이프라인</span>
+        <h1>[거시·데이터] ECOS·FRED 오픈 API를 활용한 금리·환율·유동성 시계열 DB 자동 구축기</h1>
+        <div class="post-meta">작성일: 2026년 11월 16일 · 작성자: moduin · 읽는 시간: 약 8분</div>
+
+        <div class="disclaimer-box">
+            <div class="disclaimer-title">⚠️ [필독] 법적 고지 및 투자 유의사항 (Disclaimer)</div>
+            <p>본 칼럼은 공개된 거시경제 통계 API를 수집·정제하는 소프트웨어 엔지니어링 파이프라인을 다룹니다.</p>
+            <p><strong>특정 금융투자상품의 매수·매도를 권유하거나 개별 종목에 대한 투자 자문 및 조언을 제공하지 않습니다.</strong></p>
+            <p>모든 투자의 의사결정과 손익 책임은 전적으로 투자자 본인에게 귀속됩니다.</p>
+        </div>
+
+        <div class="toc-card">
+            <div class="toc-title">목차</div>
+            <ul class="toc-list">
+                <li><a href="#sec-1">1. 뉴스 헤드라인이 아닌 원천 시계열 데이터를 직접 적재해야 하는 이유</a></li>
+                <li><a href="#sec-2">2. 한국은행(ECOS)과 미국 연준(FRED) API 연동 아키텍처</a></li>
+                <li><a href="#sec-3">3. 휴장일 결측치(Null) 보간과 일·월 주기 데이터 정렬 기법</a></li>
+                <li><a href="#sec-4">4. 자동 수집 대상 핵심 매크로 지표 및 활용 기준표</a></li>
+            </ul>
+        </div>
+
+        <p>매일 아침 증권사 시황 리포트나 경제 뉴스를 읽다 보면 같은 지표를 두고도 해석이 정반대로 갈리는 경우가 허다합니다. 객관적인 자산 배분과 리스크 관리를 수행하려면 누군가 가공해 놓은 뉴스 텍스트가 아니라, <strong>중앙은행이 발표하는 원천 시계열 데이터를 내 로컬 데이터베이스에 직접 쌓아두고 정량적으로 비교</strong>할 수 있어야 합니다.</p>
+
+        <h2 id="sec-1">1. 뉴스 헤드라인이 아닌 원천 시계열 데이터를 직접 적재해야 하는 이유</h2>
+        <p>한국은행 경제통계시스템(ECOS)과 미국 세인트루이스 연방준비은행(FRED)은 무료 인증키만으로 수만 종의 거시경제 시계열 데이터를 JSON/XML 형태로 개방하고 있습니다. 이를 매일 아침 스케줄러로 자동 수집해 두면 엑셀 수작업 없이도 한미 금리 역전 폭이나 실질금리 추이를 즉시 쿼리할 수 있습니다.</p>
+
+        <h2 id="sec-2">2. 한국은행(ECOS)과 미국 연준(FRED) API 연동 아키텍처</h2>
+        <ul>
+            <li><strong>메타데이터 기반 수집기:</strong> 지표 코드(예: <code>DGS10</code>, <code>T10Y2Y</code>, <code>722Y001</code>)를 코드에 하드코딩하지 않고 DB의 <code>MACRO_MASTER</code> 테이블에 등록해 두어, 새로운 경제 지표를 추가할 때 코드 수정 없이 행(Row)만 추가하면 자동 수집되도록 설계합니다.</li>
+            <li><strong>증분 수집(Incremental Load):</strong> 매일 10년 치 전체 데이터를 다시 내려받지 않고, 각 지표별 마지막 적재 일자(<code>MAX(BASE_DATE)</code>) 이후 구간만 API 파라미터로 요청해 트래픽과 응답 시간을 최소화합니다.</li>
+        </ul>
+
+        <h2 id="sec-3">3. 휴장일 결측치(Null) 보간과 일·월 주기 데이터 정렬 기법</h2>
+        <p>한국과 미국의 공휴일이 다르기 때문에 두 국가의 시계열 데이터를 날짜 기준으로 조인(JOIN)하면 한쪽 값이 비어 있는 결측치가 발생합니다.</p>
+        <div class="summary-card">
+            <p><strong>시계열 정렬 및 보간 규칙:</strong><br>
+            ① 휴장일로 인해 당일 데이터가 <code>.</code> 또는 <code>Null</code>로 반환되는 경우, 직전 영업일의 유효 확정값을 이월(Forward-Fill)하여 스프레드 계산 오류를 방지합니다.<br>
+            ② 소비자물가지수(CPI)나 M2 통화량처럼 월 단위로 발표되는 지표는 발표 확정일 기준으로 일별 캘린더 테이블에 매핑하여 백테스트 시 미래참조 편향이 섞이지 않도록 관리합니다.</p>
+        </div>
+
+        <h2 id="sec-4">4. 자동 수집 대상 핵심 매크로 지표 및 활용 기준표</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>데이터 소스</th>
+                    <th>핵심 지표 코드 및 관측 목적</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>FRED (미국 연준)</td>
+                    <td><code>DGS10</code> (미 국채 10년물 금리), <code>T10Y2Y</code> (10년-2년 장단기 금리차), <code>BAMLH0A0HYM2</code> (하이일드 스프레드)</td>
+                </tr>
+                <tr>
+                    <td>ECOS (한국은행)</td>
+                    <td>기준금리, 국고채 3년·10년물 수익률, 원/달러 종가 환율, 광의통화(M2) 평잔 추이</td>
+                </tr>
+                <tr>
+                    <td>파생 연산 지표</td>
+                    <td>한미 국채 10년물 금리 스프레드 및 실질금리(명목금리 - 기대인플레이션) 자동 산출 뷰(View)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>매일 아침 자동으로 갱신되는 거시경제 데이터베이스는 감정에 휘둘리는 뇌동매매를 막아주고, 현재 시장이 유동성 확장 국면인지 긴축 경계 국면인지를 수치로 판단하게 해주는 가장 객관적인 나침반이 됩니다.</p>
+    </main>
+    <footer>
+        <p>&copy; 2026 moduin.kr. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
