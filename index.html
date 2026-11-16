@@ -65,57 +65,28 @@
         /* 대표 대문 이미지 */
         .hero-image {
             width: 100%;
-            max-height: 520px;
+            max-height: 440px;
             object-fit: cover;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-            margin-bottom: 35px;
+            margin-bottom: 28px;
             display: block;
         }
 
         /* 소개 텍스트 */
         p.desc { 
-            font-size: 1.15rem; 
+            font-size: 1.12rem; 
             color: #555; 
-            margin-bottom: 35px; 
+            margin-bottom: 40px; 
             line-height: 1.7; 
             word-break: keep-all;
         }
 
-        /* 소통 버튼 그룹 */
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 60px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 14px 30px;
-            font-size: 1.05rem;
-            font-weight: bold;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-        }
-        .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
-        }
-        
-        .btn-subscribe { background-color: #d35400; }
-        .btn-request { background-color: #27ae60; }
-        .btn-guestbook { background-color: #2980b9; }
-
         /* 기술 칼럼 글 목록 섹션 */
         .content-section {
             text-align: left;
-            margin-top: 20px;
+            margin-top: 10px;
+            margin-bottom: 55px;
         }
         .section-title {
             font-size: 1.4rem;
@@ -172,6 +143,39 @@
             color: #999; 
         }
 
+        /* 하단 배치된 도구 및 소통 영역 */
+        .bottom-tools-wrap {
+            margin-top: 20px;
+            padding-top: 35px;
+            border-top: 1px solid #e8e6e1;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 13px 26px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+        }
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+        }
+        .btn-subscribe { background-color: #d35400; }
+        .btn-request { background-color: #27ae60; }
+        .btn-guestbook { background-color: #2980b9; }
+
         /* 하단 푸터 */
         footer { 
             width: 100%;
@@ -203,6 +207,7 @@
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P4TG8SLQ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+    
     <!-- 상단 네비게이션 바 -->
     <header>
         <div class="nav-inner">
@@ -224,35 +229,15 @@
         
         <!-- 소개 문구 -->
         <p class="desc">
-            IT 업무 자동화, 스마트팩토리, 그리고 실용적인 개발 이야기.<br>
-            당신의 시간을 아껴주는 기술을 공유합니다.
+            20년 이상 제조 현장 MES, 설비 데이터 파이프라인, C#/.NET 업무 자동화 시스템을 구축한 엔지니어의 기술 아카이브입니다.<br>
+            현업에서 검증된 아키텍처 설계와 트러블슈팅 경험을 기록합니다.
         </p>
 
-        <!-- 소통 액션 버튼 -->
-        <div class="action-buttons">
-            <a href="https://page.stibee.com/subscriptions/528437" target="_blank" class="btn btn-subscribe">뉴스레터 구독하기</a>
-            <a href="https://forms.gle/5Gk1uLgRWsm7SWMm9" target="_blank" class="btn btn-request">작업 의뢰 / 문의</a>
-            <a href="https://github.com/mch9989/moduin.github.io/discussions" target="_blank" class="btn btn-guestbook">방명록 남기기</a>
-        </div>
-
-        <!-- 실무 배포 도구 하이라이트 배너 -->
-        <div style="background:#fff; border:2px solid #27ae60; border-radius:10px; padding:25px; margin-bottom:45px; text-align:left; box-shadow:0 6px 16px rgba(0,0,0,0.04);">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
-                <div>
-                    <span style="background:#eef7f2; color:#27ae60; font-size:0.75rem; font-weight:bold; padding:4px 10px; border-radius:15px;">실무 배포 도구 · Interactive Live Demo</span>
-                    <h3 style="font-size:1.35rem; color:#2c3e50; margin-top:8px;">StockPhotoUploader (AI 메타데이터 추출 &amp; SFTP 자동화)</h3>
-                    <p style="color:#666; font-size:0.95rem; margin-top:4px;">제미나이 API 연동, 로컬 캐싱, 비동기 배치 전송을 웹 데모로 직접 체험하고 프로그램을 다운로드할 수 있습니다.</p>
-                </div>
-                <a href="tools/stock-uploader.html" style="background:#27ae60; color:#fff; text-decoration:none; padding:12px 24px; font-weight:bold; border-radius:6px; white-space:nowrap;">도구 체험 &amp; 다운로드 →</a>
-            </div>
-        </div>
-
-        <!-- 기술 칼럼 포스팅 영역 (최신순 역순 정렬) -->
+        <!-- 기술 칼럼 포스팅 영역 (첫 화면 메인 콘텐츠) -->
         <div class="content-section" id="tech-list">
             <h2 class="section-title">기술 및 개발 칼럼 (최신순)</h2>
             <div class="post-list">
 
-                <!-- 2026. 11. 16 신규 추가 11편 -->
                 <a href="wealth/post-14.html" class="post-card">
                     <span class="post-tag">자산관리 &amp; 거시 데이터 파이프라인</span>
                     <h3>[거시·데이터] ECOS·FRED 오픈 API를 활용한 금리·환율·유동성 시계열 DB 자동 구축기</h3>
@@ -330,13 +315,20 @@
                     <span class="post-date">2026. 11. 16 · 읽는 시간 8분</span>
                 </a>
 
-                <!-- 기존 포스트 목록 -->
-                <a class="post-card" href="automation/post-08.html"><span class="post-tag">AI·업무자동화</span><h3>[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계</h3><span class="post-date">2026. 11. 10</span></a>
-                <a class="post-card" href="wealth/post-11.html"><span class="post-tag">자산관리·투자</span><h3>[국장 시황/2026.11.10] 변동성 장세 속 외인·기관 수급 양극화와 지지선 점검</h3><span class="post-date">2026. 11. 10</span></a>
-                <a class="post-card" href="smartfactory/post-09.html"><span class="post-tag">스마트팩토리</span><h3>[스마트팩토리] 중소 제조현장 레거시 PLC 연동을 위한 경량 엣지 데이터 브로커 설계</h3><span class="post-date">2026. 11. 09</span></a>
-                <a class="post-card" href="wealth/post-10.html"><span class="post-tag">자산관리·투자</span><h3>[국장 마감] 코스피·코스닥 수급 공방과 반도체·2차전지 주도권 점검</h3><span class="post-date">2026. 11. 09</span></a>
+                <a class="post-card" href="automation/post-08.html">
+                    <span class="post-tag">AI &amp; 업무자동화</span>
+                    <h3>[업무자동화] UI 클릭형 RPA가 현장에서 무너지는 이유와 이벤트 기반 헤드리스 파이프라인 설계</h3>
+                    <p>화면 좌표 기반 매크로의 운영 한계를 짚고, API 우회와 파일 시스템 이벤트 감시를 결합한 무인 백그라운드 자동화 파이프라인 아키텍처를 정리한다.</p>
+                    <span class="post-date">2026. 11. 10 · 읽는 시간 8분</span>
+                </a>
 
-                <!-- 9번 포스트 (2026. 11. 09) -->
+                <a class="post-card" href="smartfactory/post-09.html">
+                    <span class="post-tag">스마트팩토리 &amp; 현장 아키텍처</span>
+                    <h3>[스마트팩토리] 중소 제조현장 레거시 PLC 연동을 위한 경량 엣지 데이터 브로커 설계</h3>
+                    <p>중소 제조현장 PLC와 상위 MES/DB 간 통신 단절 및 데이터 유실을 방지하는 무손실 Store-and-Forward 엣지 브로커 아키텍처.</p>
+                    <span class="post-date">2026. 11. 09 · 읽는 시간 8분</span>
+                </a>
+
                 <a href="wealth/post-09.html" class="post-card">
                     <span class="post-tag">자산관리 &amp; 매크로 데이터</span>
                     <h3>국내 증시 현황과 거시경제 유동성 지표 기반 단기 장세 진단</h3>
@@ -344,7 +336,6 @@
                     <span class="post-date">2026. 11. 09 · 읽는 시간 9분</span>
                 </a>
 
-                <!-- 8번 포스트 (2026. 11. 09) -->
                 <a href="smartfactory/post-08.html" class="post-card">
                     <span class="post-tag">스마트팩토리 &amp; 엣지컴퓨팅</span>
                     <h3>초당 수천 건의 설비 센서 틱 처리를 위한 링 버퍼(Ring Buffer)와 인메모리 집계</h3>
@@ -352,7 +343,6 @@
                     <span class="post-date">2026. 11. 09 · 읽는 시간 9분</span>
                 </a>
 
-                <!-- 7번 포스트 (2026. 11. 09) -->
                 <a href="automation/post-07.html" class="post-card">
                     <span class="post-tag">AI &amp; 업무자동화</span>
                     <h3>C# 무인 배치 자동화의 핵심: Polly 기반 지수 백오프와 서킷 브레이커</h3>
@@ -360,7 +350,6 @@
                     <span class="post-date">2026. 11. 09 · 읽는 시간 8분</span>
                 </a>
 
-                <!-- 6번 포스트 (2026. 11. 05) -->
                 <a href="wealth/post-06.html" class="post-card">
                     <span class="post-tag">자산관리 &amp; 부동산 데이터</span>
                     <h3>공공데이터포털 REST API를 활용한 부동산 실거래가 수집 및 퀀트 분석 파이프라인</h3>
@@ -368,7 +357,6 @@
                     <span class="post-date">2026. 11. 05 · 읽는 시간 7분</span>
                 </a>
 
-                <!-- 5번 포스트 (2026. 11. 05) -->
                 <a href="automation/post-05.html" class="post-card">
                     <span class="post-tag">C# &amp; 성능 최적화</span>
                     <h3>C# .NET 대용량 데이터 처리 시 메모리 누수 방지와 IDisposable 패턴</h3>
@@ -376,7 +364,6 @@
                     <span class="post-date">2026. 11. 05 · 읽는 시간 8분</span>
                 </a>
 
-                <!-- 4번 포스트 (2026. 11. 05) -->
                 <a href="smartfactory/post-04.html" class="post-card">
                     <span class="post-tag">스마트팩토리 &amp; IoT</span>
                     <h3>스마트팩토리 설비 데이터 실시간 수집을 위한 OPC UA와 C# 통신 아키텍처</h3>
@@ -384,7 +371,6 @@
                     <span class="post-date">2026. 11. 05 · 읽는 시간 8분</span>
                 </a>
 
-                <!-- 3번 포스트 (2026. 11. 05) -->
                 <a href="wealth/post-03.html" class="post-card">
                     <span class="post-tag">자산관리 &amp; 알고리즘</span>
                     <h3>증권사 OpenAPI 연동 기반 C# 퀀트 스크리닝 시스템 아키텍처</h3>
@@ -392,7 +378,6 @@
                     <span class="post-date">2026. 11. 05 · 읽는 시간 9분</span>
                 </a>
 
-                <!-- 2번 포스트 (2026. 11. 05) -->
                 <a href="smartfactory/post-02.html" class="post-card">
                     <span class="post-tag">스마트팩토리</span>
                     <h3>제조 현장 레거시 시스템과 MES 연동 시 반드시 체크할 데이터 아키텍처</h3>
@@ -400,7 +385,6 @@
                     <span class="post-date">2026. 11. 05 · 읽는 시간 8분</span>
                 </a>
 
-                <!-- 1번 포스트 (2026. 11. 05) -->
                 <a href="automation/post-01.html" class="post-card">
                     <span class="post-tag">AI &amp; 자동화</span>
                     <h3>C# .NET과 제미나이 API를 활용한 업무 자동화 파이프라인 구축기</h3>
@@ -410,6 +394,26 @@
 
             </div>
         </div>
+
+        <!-- 하단으로 이동한 실무 배포 도구 배너 및 소통 버튼 -->
+        <div class="bottom-tools-wrap">
+            <div style="background:#fff; border:1px solid #d5e8dc; border-left:4px solid #27ae60; border-radius:10px; padding:22px 25px; text-align:left; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                    <div>
+                        <span style="background:#eef7f2; color:#27ae60; font-size:0.75rem; font-weight:bold; padding:4px 10px; border-radius:15px;">오픈소스·실무 배포 도구</span>
+                        <h3 style="font-size:1.25rem; color:#2c3e50; margin-top:8px;">StockPhotoUploader (AI 메타데이터 추출 &amp; SFTP 자동화)</h3>
+                        <p style="color:#666; font-size:0.92rem; margin-top:4px;">제미나이 API 연동, 로컬 캐싱, 비동기 배치 전송을 웹 데모로 확인하고 기술 문서를 열람할 수 있습니다.</p>
+                    </div>
+                    <a href="tools/stock-uploader.html" style="background:#27ae60; color:#fff; text-decoration:none; padding:11px 22px; font-weight:bold; border-radius:6px; white-space:nowrap;">기술 문서 &amp; 데모 보기 →</a>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="https://page.stibee.com/subscriptions/528437" target="_blank" class="btn btn-subscribe">뉴스레터 구독하기</a>
+                <a href="https://forms.gle/5Gk1uLgRWsm7SWMm9" target="_blank" class="btn btn-request">기술 자문 / 문의</a>
+                <a href="https://github.com/mch9989/moduin.github.io/discussions" target="_blank" class="btn btn-guestbook">방명록 남기기</a>
+            </div>
+        </div>
     </div>
 
     <!-- 푸터 -->
@@ -417,6 +421,7 @@
         <p>© 2026 moduin.kr &amp; PlatformWorks. All Rights Reserved.</p>
         <p style="margin-top: 8px;">
             <a href="privacy.html">개인정보처리방침 (Privacy Policy)</a> | 
+            <a href="about.html">운영자 및 기술 아키텍처 소개</a> | 
             <a href="https://github.com/mch9989/moduin.github.io/discussions" target="_blank">문의 및 기술 피드백</a>
         </p>
     </footer>
